@@ -5,6 +5,7 @@ import AnimatedSection from "../../../components/common/AnimatedSection/Animated
 import { staggerContainer, staggerItem } from "../../../animations/variants";
 import { useScrollAnimation } from "../../../hooks/useScrollAnimation";
 import { useBookingModal } from "../../../hooks/useNewBookingModal";
+import { API_BASE } from "../../../config/api";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -78,8 +79,7 @@ const Services = () => {
 
   const fetchServices = async () => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-      const { data } = await axios.get(`${apiUrl}/api/services`);
+      const { data } = await axios.get(`${API_BASE}/services`);
       const normalServices = data.filter(s => s.category !== 'combo');
       const comboServices = data.filter(s => s.category === 'combo');
       const allCombos = comboServices.flatMap(s => s.combos || []);

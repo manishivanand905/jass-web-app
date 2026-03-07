@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { API_BASE } from "../../../config/api";
 import Sidebar from "../../../components/common/Sidebar/Sidebar";
 import Footer from "../../../components/common/Footer/Footer";
 import {
@@ -66,8 +67,7 @@ const Products = () => {
   const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
-      const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
-      const { data } = await axios.get(`${apiUrl}/api/products`, {
+      const { data } = await axios.get(`${API_BASE}/products`, {
         params: {
           search: searchQuery,
           category: activeFilter,
