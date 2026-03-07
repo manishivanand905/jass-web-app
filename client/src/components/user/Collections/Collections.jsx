@@ -27,7 +27,6 @@ const CARD_DELAYS = ["0.1s", "0.2s", "0.3s", "0.4s"];
 const Collections = () => {
   const navigate = useNavigate();
   const [collections, setCollections] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -36,8 +35,6 @@ const Collections = () => {
         setCollections(data.products || []);
       } catch (error) {
         console.error('Error fetching products:', error);
-      } finally {
-        setLoading(false);
       }
     };
     fetchProducts();

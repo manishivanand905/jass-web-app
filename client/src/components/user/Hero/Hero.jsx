@@ -37,7 +37,6 @@ const stats = [
 const HeroSection = () => {
   const navigate = useNavigate();
   const [heroProducts, setHeroProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -46,8 +45,6 @@ const HeroSection = () => {
         setHeroProducts(data.products || []);
       } catch (error) {
         console.error('Error fetching products:', error);
-      } finally {
-        setLoading(false);
       }
     };
     fetchProducts();

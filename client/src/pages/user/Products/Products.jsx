@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -63,11 +63,7 @@ const Products = () => {
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
   const [totalProducts, setTotalProducts] = useState(0);
 
-  useEffect(() => {
-    fetchProducts();
-  }, [searchQuery, activeFilter, sortBy]);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
@@ -98,7 +94,11 @@ const Products = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchQuery, activeFilter, sortBy]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const handleClearFilters = () => {
     setSearchQuery("");

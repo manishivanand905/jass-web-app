@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useCart } from "../../../context/CartContext";
-import { useBookingModal } from "../../../hooks/useNewBookingModal";
 import NotificationDropdown from "../Notifications/NotificationDropdown";
 import axios from "axios";
 import {
@@ -14,7 +13,6 @@ import {
   SearchBar,
   SearchIcon,
   SearchInput,
-  NotifBtn,
   QuickBookBtn,
   AuthButton,
 } from "./HeaderStyles";
@@ -24,7 +22,6 @@ const Header = () => {
   const [searchExpanded, setSearchExpanded] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
-  const { openModal } = useBookingModal();
   const { user, logoutUser } = useAuth();
   const { cartCount } = useCart();
   const searchRef = useRef(null);

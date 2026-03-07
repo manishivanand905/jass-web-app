@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '../../../components/admin/AdminLayout/AdminLayout';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -17,11 +17,7 @@ const Contacts = () => {
   const [selectedContact, setSelectedContact] = useState(null);
   const [newStatus, setNewStatus] = useState('');
 
-  useEffect(() => {
-    fetchContacts();
-  }, [page, statusFilter]);
-
-  const fetchContacts = async () => {
+  const fetchContacts = useCallback(async () => {
     try {
       const token = localStorage.getItem('adminToken');
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -36,7 +32,11 @@ const Contacts = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, statusFilter]);
+
+  useEffect(() => {
+    fetchContacts();
+  }, [fetchContacts]);
 
   const updateStatus = async () => {
     try {

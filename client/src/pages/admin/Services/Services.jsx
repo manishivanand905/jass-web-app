@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import AdminLayout from '../../../components/admin/AdminLayout/AdminLayout';
 import axios from 'axios';
@@ -24,13 +24,9 @@ const Services = () => {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   
-  const { register, handleSubmit, reset, formState: { errors }, watch } = useForm();
+  const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
-  useEffect(() => {
-    fetchServices();
-  }, [search]);
-
-  const fetchServices = async () => {
+  const fetchServices = useCallback(async () => {
     try {
       const token = localStorage.getItem('adminToken');
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -44,7 +40,11 @@ const Services = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [search]);
+
+  useEffect(() => {
+    fetchServices();
+  }, [fetchServices]);
 
   const openModal = (service = null) => {
     setEditingService(service);

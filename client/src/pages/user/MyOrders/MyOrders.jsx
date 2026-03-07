@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../../../services/user/api';
 import Sidebar from '../../../components/common/Sidebar/Sidebar';
-import { Container, Header, Title, Subtitle, FilterBar, SearchInput, StatusChip, OrderCard, StatusPill, OrderHeader, OrderId, ProductItem, ProductImage, ProductInfo, ProductName, Timeline, TimelineRow, SectionTitle, AddressBox, PriceRow, TotalRow, ActionRow, ActionButton, NoOrders } from './MyOrdersStyles';
+import { Container, Header, Title, Subtitle, FilterBar, SearchInput, OrderCard, StatusPill, OrderHeader, OrderId, ProductItem, ProductImage, ProductInfo, ProductName, Timeline, TimelineRow, SectionTitle, AddressBox, PriceRow, TotalRow, ActionRow, ActionButton, NoOrders } from './MyOrdersStyles';
 
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -33,13 +33,6 @@ const MyOrders = () => {
     const matchesSearch = o.orderId?.toLowerCase().includes(search.toLowerCase()) || o.items?.some(item => item.name?.toLowerCase().includes(search.toLowerCase()));
     return matchesFilter && matchesSearch;
   });
-
-  const statusCounts = {
-    processing: orders.filter(o => o.status === 'processing').length,
-    shipped: orders.filter(o => o.status === 'shipped').length,
-    delivered: orders.filter(o => o.status === 'completed').length,
-    cancelled: orders.filter(o => o.status === 'cancelled').length
-  };
 
   if (loading) {
     return (

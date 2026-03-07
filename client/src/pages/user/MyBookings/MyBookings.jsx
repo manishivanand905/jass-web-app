@@ -6,7 +6,7 @@ import { useBookingModal } from '../../../hooks/useNewBookingModal';
 import {
   Container, Header, Title, HeaderActions, SearchBar, FilterChips, Chip, Table, TableHeader, TableBody, TableRow,
   TableCell, StatusBadge, ActionButton, Modal, ModalOverlay, ModalContent, ModalHeader, ModalTitle, CloseButton,
-  DetailGrid, DetailItem, DetailLabel, DetailValue, EmptyState, Pagination, PageButton
+  DetailGrid, DetailItem, DetailLabel, DetailValue, EmptyState
 } from './MyBookingsStyles';
 
 const MyBookings = () => {
