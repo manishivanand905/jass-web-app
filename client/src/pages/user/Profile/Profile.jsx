@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { userAPI } from "../../../services/user/api";
+import { API_BASE } from "../../../config/api";
 import Sidebar from "../../../components/common/Sidebar/Sidebar";
 import { Container, HeroBanner, HeroContent, Avatar, CameraButton, HeroInfo, VerifiedBadge, StatPills, StatPill, ContentWrapper, SideNav, NavTab, MainContent, SectionTitle, FormGrid, InputGroup, Label, Input, InputIcon, ErrorText, SaveButton, DiscardButton } from "./ProfileStyles";
 
@@ -57,7 +58,7 @@ const Profile = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/auth/update-profile', {
+      const response = await fetch(`${API_BASE}/auth/update-profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

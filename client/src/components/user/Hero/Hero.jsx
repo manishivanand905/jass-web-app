@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_BASE } from "../../../config/api";
 import {
   HeroWrapper,
   HeroInner,
@@ -41,7 +42,7 @@ const HeroSection = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/products?limit=6');
+        const { data } = await axios.get(`${API_BASE}/products?limit=6`);
         setHeroProducts(data.products || []);
       } catch (error) {
         console.error('Error fetching products:', error);

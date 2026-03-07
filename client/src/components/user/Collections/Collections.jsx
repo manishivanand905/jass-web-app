@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_BASE } from "../../../config/api";
 import {
   SectionWrapper,
   SectionHeader,
@@ -31,7 +32,7 @@ const Collections = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/products?limit=4');
+        const { data } = await axios.get(`${API_BASE}/products?limit=4`);
         setCollections(data.products || []);
       } catch (error) {
         console.error('Error fetching products:', error);

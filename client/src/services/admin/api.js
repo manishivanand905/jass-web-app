@@ -1,9 +1,9 @@
-const API_BASE = 'http://localhost:5000/api/admin';
+import { API_BASE, ADMIN_API_BASE } from "../../config/api";
 
 export const adminAPI = {
   register: async (data) => {
     try {
-      const response = await fetch('http://localhost:5000/api/admin/auth/register', {
+      const response = await fetch(`${ADMIN_API_BASE}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -16,7 +16,7 @@ export const adminAPI = {
 
   login: async (data) => {
     try {
-      const response = await fetch('http://localhost:5000/api/admin/auth/login', {
+      const response = await fetch(`${ADMIN_API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -29,7 +29,7 @@ export const adminAPI = {
 
   getProducts: async (page = 1, limit = 10, search = '') => {
     const token = localStorage.getItem('adminToken');
-    const response = await fetch(`${API_BASE}/products?page=${page}&limit=${limit}&search=${search}`, {
+    const response = await fetch(`${ADMIN_API_BASE}/products?page=${page}&limit=${limit}&search=${search}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     return response.json();
@@ -37,7 +37,7 @@ export const adminAPI = {
 
   createProduct: async (data) => {
     const token = localStorage.getItem('adminToken');
-    const response = await fetch(`${API_BASE}/products`, {
+    const response = await fetch(`${ADMIN_API_BASE}/products`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -50,7 +50,7 @@ export const adminAPI = {
 
   updateProduct: async (id, data) => {
     const token = localStorage.getItem('adminToken');
-    const response = await fetch(`${API_BASE}/products/${id}`, {
+    const response = await fetch(`${ADMIN_API_BASE}/products/${id}`, {
       method: 'PUT',
       headers: { 
         'Content-Type': 'application/json',
@@ -63,7 +63,7 @@ export const adminAPI = {
 
   deleteProduct: async (id) => {
     const token = localStorage.getItem('adminToken');
-    const response = await fetch(`${API_BASE}/products/${id}`, {
+    const response = await fetch(`${ADMIN_API_BASE}/products/${id}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` }
     });
@@ -72,7 +72,7 @@ export const adminAPI = {
 
   getBookings: async (page = 1, limit = 10, search = '', status = '') => {
     const token = localStorage.getItem('adminToken');
-    const response = await fetch(`${API_BASE}/bookings?page=${page}&limit=${limit}&search=${search}&status=${status}`, {
+    const response = await fetch(`${ADMIN_API_BASE}/bookings?page=${page}&limit=${limit}&search=${search}&status=${status}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     return response.json();
@@ -80,7 +80,7 @@ export const adminAPI = {
 
   updateBookingStatus: async (id, status) => {
     const token = localStorage.getItem('adminToken');
-    const response = await fetch(`${API_BASE}/bookings/${id}/status`, {
+    const response = await fetch(`${ADMIN_API_BASE}/bookings/${id}/status`, {
       method: 'PATCH',
       headers: { 
         'Content-Type': 'application/json',
@@ -93,7 +93,7 @@ export const adminAPI = {
 
   getStats: async () => {
     const token = localStorage.getItem('adminToken');
-    const response = await fetch(`${API_BASE}/bookings/stats`, {
+    const response = await fetch(`${ADMIN_API_BASE}/bookings/stats`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     return response.json();
@@ -101,7 +101,7 @@ export const adminAPI = {
 
   getOrders: async () => {
     const token = localStorage.getItem('adminToken');
-    const response = await fetch('http://localhost:5000/api/orders', {
+    const response = await fetch(`${API_BASE}/orders`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     return response.json();
@@ -109,7 +109,7 @@ export const adminAPI = {
 
   updateOrderStatus: async (id, status) => {
     const token = localStorage.getItem('adminToken');
-    const response = await fetch(`http://localhost:5000/api/orders/${id}/status`, {
+    const response = await fetch(`${API_BASE}/orders/${id}/status`, {
       method: 'PATCH',
       headers: { 
         'Content-Type': 'application/json',

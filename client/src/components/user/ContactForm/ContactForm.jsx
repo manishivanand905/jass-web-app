@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { serviceOptions, timeSlots } from "../../../data/contactData";
+import { API_BASE } from "../../../config/api";
 import {
   FormSection,
   FormHeader,
@@ -45,7 +46,7 @@ const ContactForm = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/contacts', {
+      const response = await fetch(`${API_BASE}/contacts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

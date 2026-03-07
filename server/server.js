@@ -20,9 +20,25 @@ const searchRoutes = require("./routes/searchRoutes");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const explicitOrigins = [
+  process.env.FRONTEND_URL,
+  ...(process.env.FRONTEND_URLS || "").split(",").map((o) => o.trim()),
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+
+      const isExplicitlyAllowed = explicitOrigins.includes(origin);
+      const isVercelPreview = origin.endsWith(".vercel.app");
+
+      if (isExplicitlyAllowed || isVercelPreview) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   }),
 );
