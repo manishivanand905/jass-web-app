@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { heroProducts } from "../../../data/productsData";
+import axios from "axios";
 import {
   HeroWrapper,
   HeroInner,
@@ -28,9 +28,6 @@ import {
   StatLabel,
 } from "./HeroStyles";
 
-// Duplicate products so ticker loops seamlessly
-const tickerItems = [...heroProducts, ...heroProducts];
-
 const stats = [
   { number: "500+", label: "Vehicles Protected" },
   { number: "10Y", label: "Warranty" },
@@ -39,6 +36,24 @@ const stats = [
 
 const HeroSection = () => {
   const navigate = useNavigate();
+  const [heroProducts, setHeroProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const { data } = await axios.get('http://localhost:5000/api/products?limit=6');
+        setHeroProducts(data.products || []);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  const tickerItems = [...heroProducts, ...heroProducts];
 
   return (
     <HeroWrapper>
@@ -47,13 +62,13 @@ const HeroSection = () => {
         <TickerWrapper>
           <TickerTrack>
             {tickerItems.map((product, index) => (
-              <TickerCard key={`${product.id}-${index}`}>
+              <TickerCard key={`${product._id}-${index}`} onClick={() => navigate(`/products/${product._id}`)}>
                 <TickerImage>
                   <img src={product.image} alt={product.name} loading="lazy" />
                 </TickerImage>
                 <TickerLabel>
                   <p>{product.name}</p>
-                  <span>{product.price}</span>
+                  <span>₹{product.price}</span>
                 </TickerLabel>
               </TickerCard>
             ))}
@@ -85,7 +100,7 @@ const HeroSection = () => {
               Explore Products
               <span className="arrow">→</span>
             </PrimaryButton>
-            <SecondaryButton onClick={() => navigate("/explore")}>View PPF</SecondaryButton>
+            <SecondaryButton onClick={() => navigate("/services")}>View Services</SecondaryButton>
           </CTAGroup>
         </LeftContent>
 
@@ -102,7 +117,7 @@ const HeroSection = () => {
         {/* DESKTOP ONLY: floating product grid */}
         <ProductsGrid>
           {heroProducts.slice(0, 6).map((product, index) => (
-            <ProductCard key={product.id} $delay={index * 0.15}>
+            <ProductCard key={product._id} $delay={index * 0.15} onClick={() => navigate(`/products/${product._id}`)}>
               <ProductImageWrapper>
                 <img src={product.image} alt={product.name} loading="lazy" />
               </ProductImageWrapper>

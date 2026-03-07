@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { collections } from "../../../data/productsData";
+import axios from "axios";
 import {
   SectionWrapper,
   SectionHeader,
@@ -26,13 +26,29 @@ const CARD_DELAYS = ["0.1s", "0.2s", "0.3s", "0.4s"];
 
 const Collections = () => {
   const navigate = useNavigate();
+  const [collections, setCollections] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const { data } = await axios.get('http://localhost:5000/api/products?limit=4');
+        setCollections(data.products || []);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   const handleViewAll = () => {
     navigate("/products");
   };
 
-  const handleViewDetails = (id) => {
-    navigate(`/products/${id}`);
+  const handleViewDetails = (_id) => {
+    navigate(`/products/${_id}`);
   };
 
   return (
@@ -49,9 +65,9 @@ const Collections = () => {
       <ProductsGrid>
         {collections.map((product, index) => (
           <ProductCard
-            key={product.id}
+            key={product._id}
             $delay={CARD_DELAYS[index]}
-            onClick={() => handleViewDetails(product.id)}
+            onClick={() => handleViewDetails(product._id)}
           >
             {/* Image */}
             <CardImageWrapper>
@@ -66,11 +82,11 @@ const Collections = () => {
               <CardDescription>{product.description}</CardDescription>
 
               <CardFooter>
-                <CardPrice>{product.price}</CardPrice>
+                <CardPrice>₹{product.price}</CardPrice>
                 <ViewDetailsBtn
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleViewDetails(product.id);
+                    handleViewDetails(product._id);
                   }}
                 >
                   <span className="view-details-text">View Details</span>

@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
 import Sidebar from "../../../components/common/Sidebar/Sidebar";
 import Footer from "../../../components/common/Footer/Footer";
 import { useCart } from "../../../context/CartContext";
-import { showToast } from "../../../components/common/Toast/toastConfig";
-import { heroProducts } from "../../../data/productsData";
 import {
   DetailWrapper,
   DetailContainer,
@@ -35,14 +35,69 @@ import {
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const product = heroProducts.find((p) => p.id === parseInt(id));
-  const [activeImage, setActiveImage] = useState(0);
   const { addToCart } = useCart();
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [activeImage, setActiveImage] = useState(0);
+
+  useEffect(() => {
+    fetchProduct();
+  }, [id]);
+
+  const fetchProduct = async () => {
+    try {
+      setLoading(true);
+      const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
+      const { data } = await axios.get(`${apiUrl}/api/products/${id}`);
+      setProduct(data);
+    } catch (error) {
+      console.error("Error fetching product:", error);
+      toast.error("Failed to load product");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddToCart = () => {
-    addToCart(product);
-    showToast.success('Added to cart!');
+    if (product) {
+      addToCart({
+        id: product._id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+      });
+      toast.success("Added to cart!");
+    }
   };
+
+  const renderStars = (rating) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <i
+          key={i}
+          className="fa-solid fa-star"
+          style={{
+            color: i <= Math.floor(rating || 0) ? "#cc0000" : "rgba(255,255,255,0.2)",
+          }}
+        />
+      );
+    }
+    return stars;
+  };
+
+  if (loading) {
+    return (
+      <Sidebar type="user">
+        <DetailWrapper>
+          <div style={{ padding: "100px 20px", textAlign: "center", color: "white" }}>
+            <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: "2rem" }}></i>
+          </div>
+        </DetailWrapper>
+        <Footer />
+      </Sidebar>
+    );
+  }
 
   if (!product) {
     return (
@@ -57,20 +112,6 @@ const ProductDetail = () => {
       </Sidebar>
     );
   }
-
-  const renderStars = (rating) => {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <i
-          key={i}
-          className="fa-solid fa-star"
-          style={{ color: i <= Math.floor(rating) ? "#cc0000" : "rgba(255,255,255,0.2)" }}
-        />
-      );
-    }
-    return stars;
-  };
 
   return (
     <Sidebar type="user">
@@ -107,9 +148,18 @@ const ProductDetail = () => {
               <span>{product.name}</span>
             </Breadcrumb>
 
-            <CategoryLabel>{product.category.toUpperCase()}</CategoryLabel>
+            <CategoryLabel>{product.category?.toUpperCase()}</CategoryLabel>
             {product.brand && (
-              <div style={{ fontFamily: '"Barlow Condensed", Arial, sans-serif', fontSize: '0.9rem', fontWeight: 700, color: '#cc0000', letterSpacing: '0.15em', marginBottom: '12px' }}>
+              <div
+                style={{
+                  fontFamily: '"Barlow Condensed", Arial, sans-serif',
+                  fontSize: "0.9rem",
+                  fontWeight: 700,
+                  color: "#cc0000",
+                  letterSpacing: "0.15em",
+                  marginBottom: "12px",
+                }}
+              >
                 BRAND: {product.brand}
               </div>
             )}
@@ -117,45 +167,119 @@ const ProductDetail = () => {
 
             <RatingRow>
               {renderStars(product.rating)}
-              <span>({product.rating} rating)</span>
-              <span className="count">{product.ratingCount} reviews</span>
+              <span>({product.rating || 0} rating)</span>
+              <span className="count">{product.ratingCount || 0} reviews</span>
             </RatingRow>
 
             <Price>₹{product.price?.toLocaleString()}</Price>
-            {!product.availability && (
-              <div style={{ display: 'inline-block', padding: '6px 12px', background: 'rgba(244,67,54,0.15)', border: '1px solid rgba(244,67,54,0.3)', borderRadius: '4px', fontFamily: '"Barlow Condensed", Arial, sans-serif', fontSize: '0.75rem', fontWeight: 700, color: '#f44336', letterSpacing: '0.1em', marginBottom: '16px' }}>
+            {!product.available && (
+              <div
+                style={{
+                  display: "inline-block",
+                  padding: "6px 12px",
+                  background: "rgba(244,67,54,0.15)",
+                  border: "1px solid rgba(244,67,54,0.3)",
+                  borderRadius: "4px",
+                  fontFamily: '"Barlow Condensed", Arial, sans-serif',
+                  fontSize: "0.75rem",
+                  fontWeight: 700,
+                  color: "#f44336",
+                  letterSpacing: "0.1em",
+                  marginBottom: "16px",
+                }}
+              >
                 OUT OF STOCK
               </div>
             )}
-            {product.availability && product.stock && product.stock < 10 && (
-              <div style={{ display: 'inline-block', padding: '6px 12px', background: 'rgba(255,193,7,0.15)', border: '1px solid rgba(255,193,7,0.3)', borderRadius: '4px', fontFamily: '"Barlow Condensed", Arial, sans-serif', fontSize: '0.75rem', fontWeight: 700, color: '#ffc107', letterSpacing: '0.1em', marginBottom: '16px' }}>
+            {product.available && product.stock && product.stock < 10 && (
+              <div
+                style={{
+                  display: "inline-block",
+                  padding: "6px 12px",
+                  background: "rgba(255,193,7,0.15)",
+                  border: "1px solid rgba(255,193,7,0.3)",
+                  borderRadius: "4px",
+                  fontFamily: '"Barlow Condensed", Arial, sans-serif',
+                  fontSize: "0.75rem",
+                  fontWeight: 700,
+                  color: "#ffc107",
+                  letterSpacing: "0.1em",
+                  marginBottom: "16px",
+                }}
+              >
                 ONLY {product.stock} LEFT
               </div>
             )}
 
-            <Description>{product.fullDescription}</Description>
+            <Description>{product.fullDescription || product.shortDescription}</Description>
 
             <Divider />
 
             {(product.durability || product.warranty) && (
               <>
                 <SectionLabel>WARRANTY & DURABILITY</SectionLabel>
-                <div style={{ marginBottom: '24px' }}>
+                <div style={{ marginBottom: "24px" }}>
                   {product.durability && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                      <i className="fa-solid fa-clock" style={{ color: '#cc0000', fontSize: '1.2rem' }} />
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px" }}>
+                      <i
+                        className="fa-solid fa-clock"
+                        style={{ color: "#cc0000", fontSize: "1.2rem" }}
+                      />
                       <div>
-                        <div style={{ fontFamily: '"Barlow Condensed", Arial, sans-serif', fontSize: '0.75rem', fontWeight: 600, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Durability</div>
-                        <div style={{ fontFamily: '"Cormorant Garamond", Georgia, serif', fontStyle: 'italic', fontSize: '1rem', color: 'white' }}>{product.durability} {product.durability === 1 ? 'Year' : 'Years'}</div>
+                        <div
+                          style={{
+                            fontFamily: '"Barlow Condensed", Arial, sans-serif',
+                            fontSize: "0.75rem",
+                            fontWeight: 600,
+                            color: "rgba(255,255,255,0.5)",
+                            letterSpacing: "0.1em",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Durability
+                        </div>
+                        <div
+                          style={{
+                            fontFamily: '"Cormorant Garamond", Georgia, serif',
+                            fontStyle: "italic",
+                            fontSize: "1rem",
+                            color: "white",
+                          }}
+                        >
+                          {product.durability} {product.durability === 1 ? "Year" : "Years"}
+                        </div>
                       </div>
                     </div>
                   )}
                   {product.warranty && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <i className="fa-solid fa-shield-halved" style={{ color: '#cc0000', fontSize: '1.2rem' }} />
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <i
+                        className="fa-solid fa-shield-halved"
+                        style={{ color: "#cc0000", fontSize: "1.2rem" }}
+                      />
                       <div>
-                        <div style={{ fontFamily: '"Barlow Condensed", Arial, sans-serif', fontSize: '0.75rem', fontWeight: 600, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Warranty</div>
-                        <div style={{ fontFamily: '"Cormorant Garamond", Georgia, serif', fontStyle: 'italic', fontSize: '1rem', color: 'white' }}>{product.warranty}</div>
+                        <div
+                          style={{
+                            fontFamily: '"Barlow Condensed", Arial, sans-serif',
+                            fontSize: "0.75rem",
+                            fontWeight: 600,
+                            color: "rgba(255,255,255,0.5)",
+                            letterSpacing: "0.1em",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Warranty
+                        </div>
+                        <div
+                          style={{
+                            fontFamily: '"Cormorant Garamond", Georgia, serif',
+                            fontStyle: "italic",
+                            fontSize: "1rem",
+                            color: "white",
+                          }}
+                        >
+                          {product.warranty}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -164,34 +288,40 @@ const ProductDetail = () => {
               </>
             )}
 
-            <SectionLabel>SPECIFICATIONS</SectionLabel>
-            <SpecsGrid>
-              {product.specifications.map((spec, index) => (
-                <SpecPill key={index}>
-                  <span className="label">{spec.label}:</span>
-                  <span className="value">{spec.value}</span>
-                </SpecPill>
-              ))}
-            </SpecsGrid>
+            {product.specifications && product.specifications.length > 0 && (
+              <>
+                <SectionLabel>SPECIFICATIONS</SectionLabel>
+                <SpecsGrid>
+                  {product.specifications.map((spec, index) => (
+                    <SpecPill key={index}>
+                      <span className="label">{spec.label}:</span>
+                      <span className="value">{spec.value}</span>
+                    </SpecPill>
+                  ))}
+                </SpecsGrid>
+                <Divider />
+              </>
+            )}
 
-            <Divider />
-
-            <SectionLabel>FEATURES</SectionLabel>
-            <FeaturesGrid>
-              {product.features.map((feature, index) => (
-                <FeatureItem key={index}>
-                  <i className="fa-solid fa-shield-halved" />
-                  <span>{feature}</span>
-                </FeatureItem>
-              ))}
-            </FeaturesGrid>
-
-            <Divider />
+            {product.features && product.features.length > 0 && (
+              <>
+                <SectionLabel>FEATURES</SectionLabel>
+                <FeaturesGrid>
+                  {product.features.map((feature, index) => (
+                    <FeatureItem key={index}>
+                      <i className="fa-solid fa-shield-halved" />
+                      <span>{feature}</span>
+                    </FeatureItem>
+                  ))}
+                </FeaturesGrid>
+                <Divider />
+              </>
+            )}
 
             <ActionRow>
-              <BookButton onClick={handleAddToCart} disabled={!product.availability}>
+              <BookButton onClick={handleAddToCart} disabled={!product.available}>
                 <i className="fa-solid fa-cart-plus" />
-                {product.availability ? 'ADD TO CART' : 'OUT OF STOCK'}
+                {product.available ? "ADD TO CART" : "OUT OF STOCK"}
               </BookButton>
               <BackButton onClick={() => navigate(-1)}>
                 <i className="fa-solid fa-arrow-left" />

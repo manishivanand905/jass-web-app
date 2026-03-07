@@ -1,181 +1,218 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "../../../context/AuthContext";
-import Sidebar from "../../../components/common/Sidebar/Sidebar";
-import { getUserBookings } from "../../../services/user/api";
-import { Container, Header, Title, Subtitle, FilterBar, SearchInput, StatusChip, BookingCard, StatusPill, BookingHeader, BookingId, ServiceIcon, ServiceName, InfoGrid, InfoItem, Price, ActionRow, ActionButton, NoBookings } from "./MyBookingsStyles";
+import React, { useState, useEffect } from 'react';
+import Sidebar from '../../../components/common/Sidebar/Sidebar';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { useBookingModal } from '../../../hooks/useNewBookingModal';
+import {
+  Container, Header, Title, HeaderActions, SearchBar, FilterChips, Chip, Table, TableHeader, TableBody, TableRow,
+  TableCell, StatusBadge, ActionButton, Modal, ModalOverlay, ModalContent, ModalHeader, ModalTitle, CloseButton,
+  DetailGrid, DetailItem, DetailLabel, DetailValue, EmptyState, Pagination, PageButton
+} from './MyBookingsStyles';
 
 const MyBookings = () => {
-  const { user } = useAuth();
+  const { isOpen } = useBookingModal();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("all");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [selectedBooking, setSelectedBooking] = useState(null);
 
   useEffect(() => {
-    if (user) {
+    fetchBookings();
+  }, [search, statusFilter]);
+
+  useEffect(() => {
+    if (!isOpen) {
       fetchBookings();
     }
-  }, [user]);
+  }, [isOpen]);
 
   const fetchBookings = async () => {
     try {
-      const data = await getUserBookings();
-      setBookings(data);
+      setLoading(true);
+      const token = localStorage.getItem('userToken');
+      
+      if (!token) {
+        console.warn('No token found in localStorage');
+        toast.error('Please login to view bookings');
+        setBookings([]);
+        return;
+      }
+
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      const url = `${apiUrl}/api/bookings/user`;
+      console.log('Fetching bookings from:', url);
+      
+      const response = await axios.get(url, {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('Bookings response:', response.data);
+      
+      if (response.data.success && Array.isArray(response.data.bookings)) {
+        setBookings(response.data.bookings);
+      } else if (Array.isArray(response.data.bookings)) {
+        setBookings(response.data.bookings);
+      } else {
+        console.warn('Unexpected response format:', response.data);
+        setBookings([]);
+      }
     } catch (error) {
-      console.error("Error fetching bookings:", error);
+      console.error('Error fetching bookings:', error.response?.data || error.message);
+      toast.error(error.response?.data?.message || 'Failed to fetch bookings');
+      setBookings([]);
     } finally {
       setLoading(false);
     }
   };
 
   const filteredBookings = bookings.filter(b => {
-    const matchesFilter = filter === "all" || b.status.toLowerCase() === filter;
-    const matchesSearch = b.service?.toLowerCase().includes(search.toLowerCase()) || b.bookingId?.toLowerCase().includes(search.toLowerCase());
+    const matchesFilter = statusFilter === '' || b.status?.toLowerCase() === statusFilter;
+    const matchesSearch = b.bookingId?.toLowerCase().includes(search.toLowerCase()) || 
+                         b.service?.toLowerCase().includes(search.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
-  const statusCounts = {
-    pending: bookings.filter(b => b.status === "Pending").length,
-    confirmed: bookings.filter(b => b.status === "Confirmed").length,
-    completed: bookings.filter(b => b.status === "Completed").length,
-    cancelled: bookings.filter(b => b.status === "Cancelled").length
+  const getStatusColor = (status) => {
+    const colors = { 
+      pending: '#ff9800', 
+      confirmed: '#2196f3', 
+      'in-progress': '#2196f3', 
+      completed: '#00c853', 
+      cancelled: '#f44336' 
+    };
+    return colors[status?.toLowerCase()] || '#999';
   };
 
-  if (loading) {
-    return (
-      <Sidebar>
-        <Container>
-          <Header>
-            <div>
-              <Title><span>Your</span> Services</Title>
-              <Subtitle>Loading bookings...</Subtitle>
-            </div>
-          </Header>
-        </Container>
-      </Sidebar>
-    );
-  }
-
   return (
-    <Sidebar>
+    <Sidebar type="user">
       <Container>
         <Header>
-          <div>
-            <Title><span>Your</span> Services</Title>
-            <Subtitle>{bookings.length} bookings found</Subtitle>
-          </div>
-        </Header>
-
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '30px', flexWrap: 'wrap' }}>
-          <StatusChip $active={filter === "all"} onClick={() => setFilter("all")}>
-            All Bookings
-          </StatusChip>
-          <StatusChip $active={filter === "pending"} $color="#e67e22" onClick={() => setFilter("pending")}>
-            🟡 {statusCounts.pending} Pending
-          </StatusChip>
-          <StatusChip $active={filter === "confirmed"} $color="#3498db" onClick={() => setFilter("confirmed")}>
-            🔵 {statusCounts.confirmed} Confirmed
-          </StatusChip>
-          <StatusChip $active={filter === "completed"} $color="#27ae60" onClick={() => setFilter("completed")}>
-            🟢 {statusCounts.completed} Completed
-          </StatusChip>
-          <StatusChip $active={filter === "cancelled"} $color="#cc0000" onClick={() => setFilter("cancelled")}>
-            🔴 {statusCounts.cancelled} Cancelled
-          </StatusChip>
-        </div>
-
-        <FilterBar>
-          <SearchInput>
-            <i className="fa-solid fa-magnifying-glass" />
-            <input
+          <Title>MY BOOKINGS</Title>
+          <HeaderActions>
+            <SearchBar
               type="text"
               placeholder="Search bookings..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-          </SearchInput>
-          {(search || filter !== "all") && (
-            <button onClick={() => { setSearch(""); setFilter("all"); }} style={{ padding: '10px 20px', background: 'rgba(204,0,0,0.1)', border: '1px solid #cc0000', borderRadius: '6px', color: '#cc0000', cursor: 'pointer', fontFamily: 'Barlow Condensed', fontSize: '0.85rem', fontWeight: '700' }}>
-              <i className="fa-solid fa-xmark" /> Clear
-            </button>
-          )}
-        </FilterBar>
+          </HeaderActions>
+        </Header>
 
-        {filteredBookings.length === 0 ? (
-          <NoBookings>
-            <i className="fa-solid fa-calendar-xmark" />
-            <h2>No Bookings Found</h2>
-            <p>{filter !== "all" ? `No ${filter} bookings found` : "You haven't made any bookings yet."}</p>
-          </NoBookings>
+        <FilterChips>
+          <Chip $active={statusFilter === ''} onClick={() => setStatusFilter('')}>All</Chip>
+          <Chip $active={statusFilter === 'pending'} onClick={() => setStatusFilter('pending')}>Pending</Chip>
+          <Chip $active={statusFilter === 'confirmed'} onClick={() => setStatusFilter('confirmed')}>Confirmed</Chip>
+          <Chip $active={statusFilter === 'in-progress'} onClick={() => setStatusFilter('in-progress')}>In Progress</Chip>
+          <Chip $active={statusFilter === 'completed'} onClick={() => setStatusFilter('completed')}>Completed</Chip>
+          <Chip $active={statusFilter === 'cancelled'} onClick={() => setStatusFilter('cancelled')}>Cancelled</Chip>
+        </FilterChips>
+
+        {loading ? (
+          <EmptyState><i className="fas fa-spinner fa-spin"></i></EmptyState>
+        ) : filteredBookings.length === 0 ? (
+          <EmptyState>
+            <i className="fas fa-calendar-times"></i>
+            <p>{bookings.length === 0 ? 'No bookings yet' : 'No bookings found'}</p>
+          </EmptyState>
         ) : (
-          filteredBookings.map((booking) => (
-            <BookingCard key={booking._id} $status={booking.status}>
-              <BookingHeader>
-                <div>
-                  <StatusPill $status={booking.status}>{booking.status.toUpperCase()}</StatusPill>
-                  <BookingId>REF: #{booking.bookingId}</BookingId>
-                </div>
-              </BookingHeader>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
-                <ServiceIcon className="fa-solid fa-film" />
-                <div>
-                  <ServiceName>{booking.service}</ServiceName>
-                  <p style={{ color: '#B0B0B0', fontSize: '0.85rem' }}>Complete vehicle coverage</p>
-                </div>
-              </div>
-
-              <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: '20px', marginBottom: '20px' }}>
-                <InfoGrid>
-                  <InfoItem>
-                    <i className="fa-solid fa-calendar" />
-                    {new Date(booking.date).toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
-                  </InfoItem>
-                  <InfoItem>
-                    <i className="fa-solid fa-clock" />
-                    {booking.time}
-                  </InfoItem>
-                  <InfoItem>
-                    <i className="fa-solid fa-car" />
-                    {booking.vehicleModel}
-                  </InfoItem>
-                  <InfoItem>
-                    <i className="fa-solid fa-location-dot" />
-                    {booking.city || 'Hyderabad'}
-                  </InfoItem>
-                </InfoGrid>
-              </div>
-
-              <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: '20px' }}>
-                <Price>₹{booking.price || '24,999'}</Price>
-                <ActionRow>
-                  <ActionButton $variant="ghost">
-                    View Details
-                  </ActionButton>
-                  {(booking.status === "Pending" || booking.status === "Confirmed") && (
-                    <>
-                      <ActionButton $variant="ghost">
-                        <i className="fa-solid fa-calendar-days" /> Reschedule
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableCell>Booking ID</TableCell>
+                  <TableCell>Service</TableCell>
+                  <TableCell>Plan</TableCell>
+                  <TableCell>Date</TableCell>
+                  <TableCell>Time</TableCell>
+                  <TableCell>Car</TableCell>
+                  <TableCell>Amount</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredBookings.map(booking => (
+                  <TableRow key={booking._id}>
+                    <TableCell data-label="Booking ID">{booking.bookingId}</TableCell>
+                    <TableCell data-label="Service">{booking.service}</TableCell>
+                    <TableCell data-label="Plan">{booking.serviceTier}</TableCell>
+                    <TableCell data-label="Date">{new Date(booking.date).toLocaleDateString()}</TableCell>
+                    <TableCell data-label="Time">{booking.timeSlot}</TableCell>
+                    <TableCell data-label="Car">{booking.carBrand} {booking.carModel}</TableCell>
+                    <TableCell data-label="Amount">₹{booking.totalAmount?.toLocaleString()}</TableCell>
+                    <TableCell data-label="Status">
+                      <StatusBadge $color={getStatusColor(booking.status)}>{booking.status}</StatusBadge>
+                    </TableCell>
+                    <TableCell data-label="Actions">
+                      <ActionButton onClick={() => setSelectedBooking(booking)}>
+                        <i className="fas fa-eye"></i>
                       </ActionButton>
-                      <ActionButton $variant="danger">
-                        Cancel Booking
-                      </ActionButton>
-                    </>
-                  )}
-                  {booking.status === "Completed" && (
-                    <ActionButton $variant="success">
-                      <i className="fa-solid fa-star" /> Write a Review
-                    </ActionButton>
-                  )}
-                  {booking.status === "Cancelled" && (
-                    <ActionButton $variant="primary">
-                      Book Again
-                    </ActionButton>
-                  )}
-                </ActionRow>
-              </div>
-            </BookingCard>
-          ))
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </>
+        )}
+
+        {selectedBooking && (
+          <>
+            <ModalOverlay onClick={() => setSelectedBooking(null)} />
+            <Modal>
+              <ModalContent>
+                <ModalHeader>
+                  <ModalTitle>Booking Details</ModalTitle>
+                  <CloseButton onClick={() => setSelectedBooking(null)}><i className="fas fa-times"></i></CloseButton>
+                </ModalHeader>
+                <DetailGrid>
+                  <DetailItem>
+                    <DetailLabel>Booking ID</DetailLabel>
+                    <DetailValue>{selectedBooking.bookingId}</DetailValue>
+                  </DetailItem>
+                  <DetailItem>
+                    <DetailLabel>Service</DetailLabel>
+                    <DetailValue>{selectedBooking.service}</DetailValue>
+                  </DetailItem>
+                  <DetailItem>
+                    <DetailLabel>Plan (Tier)</DetailLabel>
+                    <DetailValue>{selectedBooking.serviceTier}</DetailValue>
+                  </DetailItem>
+                  <DetailItem>
+                    <DetailLabel>Date</DetailLabel>
+                    <DetailValue>{new Date(selectedBooking.date).toLocaleDateString()}</DetailValue>
+                  </DetailItem>
+                  <DetailItem>
+                    <DetailLabel>Time Slot</DetailLabel>
+                    <DetailValue>{selectedBooking.timeSlot}</DetailValue>
+                  </DetailItem>
+                  <DetailItem>
+                    <DetailLabel>Car</DetailLabel>
+                    <DetailValue>{selectedBooking.carBrand} {selectedBooking.carModel} ({selectedBooking.carYear})</DetailValue>
+                  </DetailItem>
+                  <DetailItem>
+                    <DetailLabel>Color</DetailLabel>
+                    <DetailValue>{selectedBooking.carColor}</DetailValue>
+                  </DetailItem>
+                  <DetailItem>
+                    <DetailLabel>Pickup Option</DetailLabel>
+                    <DetailValue>{selectedBooking.pickupOption === 'pickup' ? 'Pick up from Home' : 'Drop at Store'}</DetailValue>
+                  </DetailItem>
+                  <DetailItem>
+                    <DetailLabel>Amount</DetailLabel>
+                    <DetailValue>₹{selectedBooking.totalAmount?.toLocaleString()}</DetailValue>
+                  </DetailItem>
+                  <DetailItem>
+                    <DetailLabel>Status</DetailLabel>
+                    <DetailValue>{selectedBooking.status}</DetailValue>
+                  </DetailItem>
+                </DetailGrid>
+              </ModalContent>
+            </Modal>
+          </>
         )}
       </Container>
     </Sidebar>

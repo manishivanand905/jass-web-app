@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const { generateToken } = require('../utils/jwt');
+const { sendRegistrationEmail, sendLoginEmail } = require('../services/emailService');
 
 exports.register = async (req, res) => {
   try {
@@ -14,6 +15,8 @@ exports.register = async (req, res) => {
 
     const user = await User.create({ name: fullName, email, password, phone, city, vehicleModel });
     const token = generateToken(user._id);
+
+    sendRegistrationEmail(user);
 
     res.status(201).json({
       success: true,
@@ -35,6 +38,8 @@ exports.login = async (req, res) => {
     }
 
     const token = generateToken(user._id);
+
+    sendLoginEmail(user);
 
     res.json({
       success: true,

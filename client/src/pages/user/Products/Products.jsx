@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
 import Sidebar from "../../../components/common/Sidebar/Sidebar";
 import Footer from "../../../components/common/Footer/Footer";
-import { heroProducts } from "../../../data/productsData";
 import {
   ProductsWrapper,
   HeroSection,
@@ -44,60 +45,64 @@ const SORT_OPTIONS = [
   { value: "rating", label: "Top Rated" },
 ];
 
+const CATEGORIES = [
+  { label: "All", value: "" },
+  { label: "PPF", value: "PPF" },
+  { label: "Ceramic Coating", value: "Ceramic Coating" },
+  { label: "Accessories", value: "Accessories" },
+];
+
 const Products = () => {
   const navigate = useNavigate();
-
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState("All");
+  const [activeFilter, setActiveFilter] = useState("");
   const [sortBy, setSortBy] = useState("featured");
   const [viewMode, setViewMode] = useState("grid");
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
+  const [totalProducts, setTotalProducts] = useState(0);
 
-  // ─── Filter + Sort Logic ────────────────────────────────────────────────────
-  const filterProducts = () => {
-    let filtered = [...heroProducts];
+  useEffect(() => {
+    fetchProducts();
+  }, [searchQuery, activeFilter, sortBy]);
 
-    if (activeFilter !== "All") {
-      const filterMap = {
-        "PPF": "PPF",
-        "Ceramic": "Ceramic", 
-        "Tools": "Accessory"
-      };
-      filtered = filtered.filter((p) => p.tag === filterMap[activeFilter]);
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
+      const { data } = await axios.get(`${apiUrl}/api/products`, {
+        params: {
+          search: searchQuery,
+          category: activeFilter,
+          limit: 100,
+        },
+      });
+
+      let filtered = data.products || [];
+
+      if (sortBy === "price-low") {
+        filtered.sort((a, b) => a.price - b.price);
+      } else if (sortBy === "price-high") {
+        filtered.sort((a, b) => b.price - a.price);
+      } else if (sortBy === "rating") {
+        filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      }
+
+      setProducts(filtered);
+      setTotalProducts(filtered.length);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      toast.error("Failed to load products");
+      setProducts([]);
+    } finally {
+      setLoading(false);
     }
-
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (p) =>
-          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.description.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
-    }
-
-    if (sortBy === "price-low") {
-      filtered.sort(
-        (a, b) =>
-          parseInt(a.price.replace(/[^0-9]/g, "")) -
-          parseInt(b.price.replace(/[^0-9]/g, "")),
-      );
-    } else if (sortBy === "price-high") {
-      filtered.sort(
-        (a, b) =>
-          parseInt(b.price.replace(/[^0-9]/g, "")) -
-          parseInt(a.price.replace(/[^0-9]/g, "")),
-      );
-    } else if (sortBy === "rating") {
-      filtered.sort((a, b) => b.rating - a.rating);
-    }
-
-    return filtered;
   };
-
-  const filteredProducts = filterProducts();
 
   const handleClearFilters = () => {
     setSearchQuery("");
-    setActiveFilter("All");
+    setActiveFilter("");
     setSortBy("featured");
   };
 
@@ -112,7 +117,7 @@ const Products = () => {
   return (
     <Sidebar type="user">
       <ProductsWrapper>
-        {/* ── Hero ── */}
+        {/* Hero Section */}
         <HeroSection>
           <HeroOverlay />
           <HeroContent>
@@ -127,10 +132,10 @@ const Products = () => {
           </HeroContent>
         </HeroSection>
 
-        {/* ── MOBILE ONLY: Stats strip below hero ── */}
+        {/* Mobile Stats */}
         <MobileStatsRow>
           <MobileStat>
-            <strong>{heroProducts.length}</strong>
+            <strong>{totalProducts}</strong>
             <span>Products</span>
           </MobileStat>
           <MobileStat>
@@ -143,9 +148,8 @@ const Products = () => {
           </MobileStat>
         </MobileStatsRow>
 
-        {/* ── Filter Bar ── */}
+        {/* Filter Bar */}
         <FilterBar>
-          {/* Search — all breakpoints */}
           <SearchInput>
             <i className="fa-solid fa-magnifying-glass" />
             <input
@@ -156,20 +160,20 @@ const Products = () => {
             />
           </SearchInput>
 
-          {/* Desktop + Tablet: pills inline */}
+          {/* Desktop Filters */}
           <FilterPills className="desktop-filters">
-            {["All", "PPF", "Ceramic", "Tools"].map((filter) => (
+            {CATEGORIES.map((cat) => (
               <FilterPill
-                key={filter}
-                $active={activeFilter === filter}
-                onClick={() => setActiveFilter(filter)}
+                key={cat.value}
+                $active={activeFilter === cat.value}
+                onClick={() => setActiveFilter(cat.value)}
               >
-                {filter}
+                {cat.label}
               </FilterPill>
             ))}
           </FilterPills>
 
-          {/* Desktop + Tablet: native select */}
+          {/* Desktop Sort */}
           <SortSection>
             <SortLabel>SORT BY</SortLabel>
             <SortSelect
@@ -184,32 +188,31 @@ const Products = () => {
             </SortSelect>
           </SortSection>
 
-          {/* MOBILE: filter chips + sort icon in one row */}
+          {/* Mobile Filters & Sort */}
           <MobileFilterSortRow>
             <FilterPills className="mobile-filters">
-              {["All", "PPF", "Ceramic", "Tools"].map((filter) => (
+              {CATEGORIES.map((cat) => (
                 <FilterPill
-                  key={filter}
-                  $active={activeFilter === filter}
-                  onClick={() => setActiveFilter(filter)}
+                  key={cat.value}
+                  $active={activeFilter === cat.value}
+                  onClick={() => setActiveFilter(cat.value)}
                 >
-                  {filter}
+                  {cat.label}
                 </FilterPill>
               ))}
             </FilterPills>
 
-            {/* Sort icon button — opens dropdown sheet */}
             <MobileSortBtn
               className={sortSheetOpen ? "active" : ""}
               onClick={() => setSortSheetOpen((prev) => !prev)}
               aria-label="Sort options"
             >
               <i className="fa-solid fa-arrow-up-wide-short" />
-              <span>{activeSortLabel.split(":")[0]}</span>
+              <span>{activeSortLabel}</span>
             </MobileSortBtn>
           </MobileFilterSortRow>
 
-          {/* MOBILE: Sort dropdown sheet */}
+          {/* Mobile Sort Sheet */}
           <MobileSortSheet $open={sortSheetOpen}>
             {SORT_OPTIONS.map((o) => (
               <SortOption
@@ -224,10 +227,10 @@ const Products = () => {
           </MobileSortSheet>
         </FilterBar>
 
-        {/* ── Results Bar ── */}
+        {/* Results Bar */}
         <ResultsBar>
           <ResultsCount>
-            Showing <strong>{filteredProducts.length}</strong> products
+            Showing <strong>{products.length}</strong> products
           </ResultsCount>
           <ViewToggle>
             <ViewButton
@@ -247,16 +250,30 @@ const Products = () => {
           </ViewToggle>
         </ResultsBar>
 
-        {/* ── Products Grid / List ── */}
-        {filteredProducts.length > 0 ? (
+        {/* Products Grid */}
+        {loading ? (
+          <EmptyState>
+            <i className="fa-solid fa-spinner fa-spin"></i>
+          </EmptyState>
+        ) : products.length > 0 ? (
           <ProductsGrid $viewMode={viewMode}>
-            {filteredProducts.map((product, index) => (
+            {products.map((product, index) => (
               <ProductCard
-                key={product.id}
-                product={product}
+                key={product._id}
+                product={{
+                  id: product._id,
+                  name: product.name,
+                  price: `${product.price.toLocaleString()}`,
+                  image: product.image,
+                  rating: product.rating || 0,
+                  ratingCount: product.ratingCount || 0,
+                  badge: product.badge,
+                  tag: product.category,
+                  description: product.shortDescription,
+                }}
                 viewMode={viewMode}
                 index={index}
-                onClick={() => navigate(`/products/${product.id}`)}
+                onClick={() => navigate(`/products/${product._id}`)}
               />
             ))}
           </ProductsGrid>

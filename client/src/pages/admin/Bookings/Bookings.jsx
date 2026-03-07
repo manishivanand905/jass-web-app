@@ -60,6 +60,14 @@ const Bookings = () => {
     return colors[status] || '#999';
   };
 
+  const getPickupLabel = (option) => {
+    return option === 'pickup' ? 'Pick up from Home' : 'Drop at Store';
+  };
+
+  const getPickupCharge = (option) => {
+    return option === 'pickup' ? 499 : 0;
+  };
+
   return (
     <AdminLayout>
       <Container>
@@ -113,7 +121,7 @@ const Bookings = () => {
                     <TableCell data-label="Booking ID">{booking.bookingId}</TableCell>
                     <TableCell data-label="Customer">{booking.customerName}</TableCell>
                     <TableCell data-label="Phone">{booking.customerPhone}</TableCell>
-                    <TableCell data-label="Service Type">{booking.serviceType || 'N/A'}</TableCell>
+                    <TableCell data-label="Service Type">{booking.service || 'N/A'}</TableCell>
                     <TableCell data-label="Plan">{booking.serviceTier || 'N/A'}</TableCell>
                     <TableCell data-label="Date">{new Date(booking.date).toLocaleDateString()}</TableCell>
                     <TableCell data-label="Time">{booking.timeSlot}</TableCell>
@@ -168,7 +176,7 @@ const Bookings = () => {
                   </DetailItem>
                   <DetailItem>
                     <DetailLabel>Service Type</DetailLabel>
-                    <DetailValue>{selectedBooking.serviceType || 'N/A'}</DetailValue>
+                    <DetailValue>{selectedBooking.service || 'N/A'}</DetailValue>
                   </DetailItem>
                   <DetailItem>
                     <DetailLabel>Selected Plan (Tier)</DetailLabel>
@@ -187,8 +195,26 @@ const Bookings = () => {
                     <DetailValue>{selectedBooking.carBrand} {selectedBooking.carModel} ({selectedBooking.carYear})</DetailValue>
                   </DetailItem>
                   <DetailItem>
-                    <DetailLabel>Amount</DetailLabel>
-                    <DetailValue>₹{selectedBooking.totalAmount?.toLocaleString()}</DetailValue>
+                    <DetailLabel>Car Color</DetailLabel>
+                    <DetailValue>{selectedBooking.carColor}</DetailValue>
+                  </DetailItem>
+                  <DetailItem>
+                    <DetailLabel>Pickup Option</DetailLabel>
+                    <DetailValue>{getPickupLabel(selectedBooking.pickupOption)}</DetailValue>
+                  </DetailItem>
+                  <DetailItem>
+                    <DetailLabel>Service Price</DetailLabel>
+                    <DetailValue>₹{(selectedBooking.totalAmount - getPickupCharge(selectedBooking.pickupOption))?.toLocaleString()}</DetailValue>
+                  </DetailItem>
+                  {getPickupCharge(selectedBooking.pickupOption) > 0 && (
+                    <DetailItem>
+                      <DetailLabel>Pickup Charge</DetailLabel>
+                      <DetailValue>₹{getPickupCharge(selectedBooking.pickupOption)}</DetailValue>
+                    </DetailItem>
+                  )}
+                  <DetailItem>
+                    <DetailLabel>Total Amount</DetailLabel>
+                    <DetailValue><strong>₹{selectedBooking.totalAmount?.toLocaleString()}</strong></DetailValue>
                   </DetailItem>
                   <DetailItem>
                     <DetailLabel>Status</DetailLabel>

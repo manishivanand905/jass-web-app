@@ -22,6 +22,8 @@ const Products = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [specs, setSpecs] = useState([]);
   const [features, setFeatures] = useState([]);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
@@ -48,6 +50,8 @@ const Products = () => {
 
   const openModal = (product = null) => {
     setEditingProduct(product);
+    setImageFile(null);
+    setImagePreview(product?.image || null);
     if (product) {
       reset(product);
       setSpecs(product.specifications || []);
@@ -63,25 +67,55 @@ const Products = () => {
   const closeModal = () => {
     setModalOpen(false);
     setEditingProduct(null);
+    setImageFile(null);
+    setImagePreview(null);
     reset({});
     setSpecs([]);
     setFeatures([]);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const onSubmit = async (formData) => {
     try {
       const token = localStorage.getItem('adminToken');
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-      const productData = { ...formData, specifications: specs, features };
+      
+      const submitData = new FormData();
+      Object.keys(formData).forEach(key => {
+        submitData.append(key, formData[key]);
+      });
+      submitData.append('specifications', JSON.stringify(specs));
+      submitData.append('features', JSON.stringify(features));
+      
+      if (imageFile) {
+        submitData.append('image', imageFile);
+      }
       
       if (editingProduct) {
-        await axios.put(`${apiUrl}/api/products/${editingProduct._id}`, productData, {
-          headers: { Authorization: `Bearer ${token}` }
+        await axios.put(`${apiUrl}/api/products/${editingProduct._id}`, submitData, {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
         });
         toast.success('Product updated successfully');
       } else {
-        await axios.post(`${apiUrl}/api/products`, productData, {
-          headers: { Authorization: `Bearer ${token}` }
+        await axios.post(`${apiUrl}/api/products`, submitData, {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
         });
         toast.success('Product created successfully');
       }
@@ -244,9 +278,27 @@ const Products = () => {
                         <Input {...register('badge')} placeholder="e.g., NEW, BESTSELLER" />
                       </FormGroup>
                       <FormGroup style={{ gridColumn: '1 / -1' }}>
-                        <Label>Image URL *</Label>
-                        <Input {...register('image', { required: true })} />
-                        {errors.image && <span style={{ color: '#f44336', fontSize: '0.85rem' }}>Required</span>}
+                        <Label>Product Image *</Label>
+                        <div style={{ display: 'flex', gap: '15px', alignItems: 'flex-start' }}>
+                          <div style={{ flex: 1 }}>
+                            <Input 
+                              type="file" 
+                              accept="image/*"
+                              onChange={handleImageChange}
+                              style={{ padding: '8px' }}
+                            />
+                            <small style={{ color: '#999', marginTop: '5px', display: 'block' }}>
+                              {imageFile ? imageFile.name : 'Choose an image file'}
+                            </small>
+                          </div>
+                          {imagePreview && (
+                            <img 
+                              src={imagePreview} 
+                              alt="Preview" 
+                              style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '4px' }}
+                            />
+                          )}
+                        </div>
                       </FormGroup>
                     </FormGrid>
                   </FormSection>

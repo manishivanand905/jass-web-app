@@ -418,7 +418,252 @@ export const BestForBadge = styled.div`
   color: #cc0000;
 `;
 
-// ─── PPF Visualiser ───────────────────────────────────────────────────────────
+// ─── Ceramic Coating Specific Styles ─────────────────────────────────────────
+export const CeramicVisualiserSection = styled.section`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 72px 24px 80px;
+  background: linear-gradient(135deg, rgba(0,100,200,0.03) 0%, rgba(0,50,150,0.02) 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(0,150,255,0.08);
+  ${revealWhenVisible}
+
+  @media (max-width: 768px) {
+    padding: 48px 16px 56px;
+  }
+`;
+
+export const CeramicHeader = styled.div`
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 44px;
+  gap: 20px;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    margin-bottom: 32px;
+  }
+`;
+
+export const CeramicTitle = styled.h2`
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: clamp(2rem, 4vw, 2.6rem);
+  font-weight: 900;
+  color: #fff;
+  margin: 8px 0 10px;
+  line-height: 1;
+
+  span {
+    color: #0099ff;
+  }
+`;
+
+export const CeramicBadge = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(0,150,255,0.08);
+  border: 1px solid rgba(0,150,255,0.15);
+  border-radius: 6px;
+  flex-shrink: 0;
+  margin-top: 4px;
+
+  i {
+    font-size: 0.78rem;
+    color: #0099ff;
+  }
+
+  span {
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(0,150,255,0.7);
+  }
+`;
+
+export const CeramicUploadBox = styled.div`
+  width: 100%;
+  padding: 52px 40px;
+  background: rgba(0,150,255,0.03);
+  border: 2px dashed
+    ${({ $dragging }) => ($dragging ? "#0099ff" : "rgba(0,150,255,0.25)")};
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.28s ease;
+  background: ${({ $dragging }) =>
+    $dragging ? "rgba(0,150,255,0.08)" : "rgba(0,150,255,0.03)"};
+
+  &:hover {
+    border-color: rgba(0,150,255,0.55);
+    background: rgba(0,150,255,0.06);
+  }
+
+  @media (max-width: 768px) {
+    padding: 36px 20px;
+  }
+`;
+
+export const CeramicUploadIcon = styled.i`
+  font-size: 3.2rem;
+  color: ${({ $dragging }) => ($dragging ? "#0099ff" : "rgba(0,150,255,0.6)")};
+  margin-bottom: 16px;
+  display: block;
+  transition: all 0.28s ease;
+  animation: ${({ $dragging }) =>
+    $dragging
+      ? css`
+          ${bounceUp} 0.6s ease infinite
+        `
+      : "none"};
+`;
+
+export const CeramicBrowseBtn = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 22px;
+  background: transparent;
+  border: 1.5px solid #0099ff;
+  border-radius: 6px;
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #0099ff;
+  transition: all 0.22s ease;
+
+  &:hover {
+    background: #0099ff;
+    color: #fff;
+  }
+
+  i {
+    font-size: 0.75rem;
+  }
+`;
+
+export const CeramicSwatchCircle = styled.div`
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: ${({ $style }) => $style};
+  border: ${({ $selected }) =>
+    $selected ? "3px solid #0099ff" : "2px solid rgba(0,150,255,0.15)"};
+  outline: ${({ $selected }) =>
+    $selected ? "2px solid rgba(0,150,255,0.35)" : "none"};
+  outline-offset: 3px;
+  transition: all 0.22s ease;
+  box-shadow: ${({ $selected }) =>
+    $selected ? "0 4px 16px rgba(0,150,255,0.4)" : "none"};
+  position: relative;
+  overflow: hidden;
+
+  @media (max-width: 480px) {
+    width: 44px;
+    height: 44px;
+  }
+`;
+
+export const CeramicCheckBadge = styled.div`
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #0099ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: ${checkPop} 0.3s ease both;
+
+  i {
+    font-size: 8px;
+    color: #fff;
+  }
+`;
+
+export const CeramicGenerateBtn = styled.button`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px 24px;
+  background: ${({ $disabled }) =>
+    $disabled ? "rgba(255,255,255,0.04)" : "linear-gradient(135deg, #0099ff 0%, #0066cc 100%)"};
+  border: 1.5px solid
+    ${({ $disabled }) => ($disabled ? "rgba(255,255,255,0.07)" : "#0099ff")};
+  border-radius: 8px;
+  cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "pointer")};
+  opacity: ${({ $disabled }) => ($disabled ? 0.45 : 1)};
+  transition: all 0.28s ease;
+  margin-bottom: 32px;
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0088ee 0%, #0055bb 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,150,255,0.4);
+  }
+
+  .btn-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: ${({ $disabled }) =>
+      $disabled ? "rgba(255,255,255,0.25)" : "#fff"};
+
+    i {
+      font-size: 1rem;
+    }
+  }
+
+  .btn-sub {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-style: italic;
+    font-size: 0.78rem;
+    color: ${({ $disabled }) =>
+      $disabled ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.8)"};
+  }
+`;
+
+export const CeramicImageLabel = styled.div`
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: ${({ $after }) => $after ? "rgba(0,150,255,0.9)" : "rgba(0, 0, 0, 0.65)"};
+  border: 1px solid ${({ $after }) => $after ? "transparent" : "rgba(255, 255, 255, 0.12)"};
+  border-radius: 100px;
+  backdrop-filter: blur(8px);
+
+  span {
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: ${({ $after }) => $after ? "#fff" : "rgba(255, 255, 255, 0.8)"};
+  }
+`;
+
+// ─── PPF Specific Styles (Original Red Theme) ─────────────────────────────────
 export const VisualiserSection = styled.section`
   max-width: 1200px;
   margin: 0 auto;

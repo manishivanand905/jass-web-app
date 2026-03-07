@@ -42,17 +42,3 @@ export const revenueData = [
   { month: 'Nov', amount: 58000 },
   { month: 'Dec', amount: 62000 }
 ];
-
-export const mockProducts = [
-  { id: 1, name: 'XPEL Ultimate Plus PPF', category: 'PPF', tag: 'PPF', price: 24999, stock: 15, rating: 4.8, featured: true, image: 'https://via.placeholder.com/50', description: 'Self-healing paint protection film' },
-  { id: 2, name: '3M Scotchgard Pro', category: 'PPF', tag: 'PPF', price: 21999, stock: 12, rating: 4.7, featured: true, image: 'https://via.placeholder.com/50', description: 'Premium protection film' },
-  { id: 3, name: 'Ceramic Pro 9H', category: 'Ceramic', tag: 'Ceramic', price: 18999, stock: 20, rating: 4.9, featured: false, image: 'https://via.placeholder.com/50', description: 'Professional ceramic coating' },
-  { id: 4, name: 'SunTek Ultra', category: 'PPF', tag: 'PPF', price: 19999, stock: 0, rating: 4.6, featured: false, image: 'https://via.placeholder.com/50', description: 'High gloss protection' }
-];
-
-export const mockBookings = [
-  ...recentBookings,
-  { id: '005', ref: '#JA-2026-0138', customer: 'Vikram Singh', phone: '+91 98765 43214', email: 'vikram@email.com', service: 'Standard PPF', tier: 'Partial Coverage', price: 15999, date: '2026-01-17', time: '4:00 PM', vehicle: 'Toyota Fortuner', year: 2022, city: 'Pune', status: 'confirmed' },
-  { id: '006', ref: '#JA-2026-0137', customer: 'Ananya Reddy', phone: '+91 98765 43215', email: 'ananya@email.com', service: 'Ceramic Pro', tier: 'Premium', price: 18999, date: '2026-01-16', time: '1:00 PM', vehicle: 'Volvo XC90', year: 2023, city: 'Chennai', status: 'completed' },
-  { id: '007', ref: '#JA-2026-0136', customer: 'Karan Malhotra', phone: '+91 98765 43216', email: 'karan@email.com', service: 'Full Body PPF', tier: 'Complete Coverage', price: 24999, date: '2026-01-15', time: '9:00 AM', vehicle: 'Porsche Cayenne', year: 2024, city: 'Hyderabad', status: 'pending' }
-];

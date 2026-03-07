@@ -35,4 +35,3 @@ export const whyChooseUsData = {
   ],
 };
 
-export default whyChooseUsData;

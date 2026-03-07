@@ -21,6 +21,15 @@ const serviceSchema = new mongoose.Schema({
     tier: String,
     popular: Boolean
   }],
+  combos: [{
+    id: String,
+    name: String,
+    icon: String,
+    includes: [String],
+    originalPrice: Number,
+    price: Number,
+    popular: Boolean
+  }],
   featured: { type: Boolean, default: false },
   available: { type: Boolean, default: true }
 }, { timestamps: true });

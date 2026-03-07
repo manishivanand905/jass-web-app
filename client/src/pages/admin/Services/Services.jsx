@@ -19,7 +19,10 @@ const Services = () => {
   const [search, setSearch] = useState('');
   const [specs, setSpecs] = useState([]);
   const [features, setFeatures] = useState([]);
+  const [combos, setCombos] = useState([]);
   const [serviceType, setServiceType] = useState('normal');
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   
   const { register, handleSubmit, reset, formState: { errors }, watch } = useForm();
 
@@ -45,24 +48,18 @@ const Services = () => {
 
   const openModal = (service = null) => {
     setEditingService(service);
+    setImageFile(null);
+    setImagePreview(service?.image || null);
     if (service) {
       if (service.category === 'combo') {
         setServiceType('combo');
-        reset({
-          name: service.name,
-          icon: service.icon,
-          originalPrice: service.originalPrice,
-          price: service.price,
-          popular: service.popular
-        });
-        setFeatures(service.includes || []);
+        setCombos(service.combos || [{ name: service.name, icon: service.icon, originalPrice: service.originalPrice, price: service.price, includes: service.includes || [], popular: service.popular }]);
       } else {
         setServiceType('normal');
         reset({
           title: service.title,
           category: service.category,
-          description: service.description,
-          image: service.image
+          description: service.description
         });
         setSpecs(service.tiers?.map(tier => ({
           label: tier.name,
@@ -72,12 +69,14 @@ const Services = () => {
           popular: tier.popular
         })) || []);
         setFeatures(service.benefits || []);
+        setCombos([]);
       }
     } else {
       setServiceType('normal');
       reset({});
       setSpecs([]);
       setFeatures([]);
+      setCombos([]);
     }
     setModalOpen(true);
   };
@@ -85,9 +84,25 @@ const Services = () => {
   const closeModal = () => {
     setModalOpen(false);
     setEditingService(null);
+    setImageFile(null);
+    setImagePreview(null);
     reset({});
     setSpecs([]);
     setFeatures([]);
+    setCombos([]);
+    setServiceType('normal');
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const onSubmit = async (formData) => {
@@ -95,16 +110,27 @@ const Services = () => {
       const token = localStorage.getItem('adminToken');
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
       
+      const submitData = new FormData();
+      
       let serviceData;
+      
       if (serviceType === 'combo') {
+        const validCombos = combos.filter(c => c.name && c.price);
+        if (validCombos.length === 0) {
+          toast.error('Add at least one combo package');
+          return;
+        }
         serviceData = {
           category: 'combo',
-          name: formData.name,
-          icon: formData.icon,
-          includes: features,
-          originalPrice: parseInt(formData.originalPrice),
-          price: parseInt(formData.price),
-          popular: formData.popular || false
+          combos: validCombos.map((combo, idx) => ({
+            id: combo.id || `combo-${idx}`,
+            name: combo.name,
+            icon: combo.icon,
+            includes: combo.includes || [],
+            originalPrice: parseInt(combo.originalPrice),
+            price: parseInt(combo.price),
+            popular: combo.popular || false
+          }))
         };
       } else {
         const tiers = specs.map((spec, idx) => ({
@@ -121,20 +147,33 @@ const Services = () => {
           title: formData.title,
           category: formData.category,
           description: formData.description,
-          image: formData.image,
           benefits: features,
           tiers
         };
       }
       
+      Object.keys(serviceData).forEach(key => {
+        submitData.append(key, typeof serviceData[key] === 'object' ? JSON.stringify(serviceData[key]) : serviceData[key]);
+      });
+      
+      if (imageFile) {
+        submitData.append('image', imageFile);
+      }
+      
       if (editingService) {
-        await axios.put(`${apiUrl}/api/services/${editingService._id}`, serviceData, {
-          headers: { Authorization: `Bearer ${token}` }
+        await axios.put(`${apiUrl}/api/services/${editingService._id}`, submitData, {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
         });
         toast.success('Service updated successfully');
       } else {
-        await axios.post(`${apiUrl}/api/services`, serviceData, {
-          headers: { Authorization: `Bearer ${token}` }
+        await axios.post(`${apiUrl}/api/services`, submitData, {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
         });
         toast.success('Service created successfully');
       }
@@ -176,6 +215,29 @@ const Services = () => {
     setFeatures(updated);
   };
 
+  const addCombo = () => setCombos([...combos, { name: '', icon: '', originalPrice: '', price: '', includes: [], popular: false }]);
+  const removeCombo = (index) => setCombos(combos.filter((_, i) => i !== index));
+  const updateCombo = (index, field, value) => {
+    const updated = [...combos];
+    updated[index][field] = value;
+    setCombos(updated);
+  };
+  const addComboService = (comboIndex) => {
+    const updated = [...combos];
+    updated[comboIndex].includes = [...(updated[comboIndex].includes || []), ''];
+    setCombos(updated);
+  };
+  const removeComboService = (comboIndex, serviceIndex) => {
+    const updated = [...combos];
+    updated[comboIndex].includes = updated[comboIndex].includes.filter((_, i) => i !== serviceIndex);
+    setCombos(updated);
+  };
+  const updateComboService = (comboIndex, serviceIndex, value) => {
+    const updated = [...combos];
+    updated[comboIndex].includes[serviceIndex] = value;
+    setCombos(updated);
+  };
+
   return (
     <AdminLayout>
       <Container>
@@ -206,11 +268,11 @@ const Services = () => {
             {services.map(service => (
               <Card key={service._id} $unavailable={!service.available}>
                 {service.featured && <CardBadge>FEATURED</CardBadge>}
-                <CardImage src={service.image || 'https://via.placeholder.com/300x200?text=Combo+Package'} alt={service.title || service.name} />
+                <CardImage src={service.image || 'https://via.placeholder.com/300x200?text=Service'} alt={service.title || 'Combo'} />
                 <CardContent>
-                  <CardTitle>{service.title || service.name}</CardTitle>
+                  <CardTitle>{service.title || 'Combo Packages'}</CardTitle>
                   <CardCategory>{service.category}</CardCategory>
-                  <CardPrice>₹{(service.price || service.tiers?.[0]?.price || service.originalPrice)?.toLocaleString()}</CardPrice>
+                  <CardPrice>₹{(service.tiers?.[0]?.price || service.combos?.[0]?.price)?.toLocaleString()}</CardPrice>
                   <CardActions>
                     <ActionButton onClick={() => openModal(service)}>
                       <i className="fas fa-edit"></i> Edit
@@ -245,6 +307,7 @@ const Services = () => {
                           reset({});
                           setSpecs([]);
                           setFeatures([]);
+                          setCombos([]);
                         }}>
                           <option value="normal">Normal Service</option>
                           <option value="combo">Combo Package</option>
@@ -254,58 +317,85 @@ const Services = () => {
                   </FormSection>
 
                   {serviceType === 'combo' ? (
-                    <>
-                      <FormSection>
-                        <SectionTitle>Combo Package Details</SectionTitle>
-                        <FormGrid>
-                          <FormGroup>
-                            <Label>Package Name *</Label>
-                            <Input {...register('name', { required: true })} placeholder="e.g., Starter Shield" />
-                            {errors.name && <span style={{ color: '#f44336', fontSize: '0.85rem' }}>Required</span>}
-                          </FormGroup>
-                          <FormGroup>
-                            <Label>Icon *</Label>
-                            <Input {...register('icon', { required: true })} placeholder="e.g., fa-solid fa-layer-group" />
-                            {errors.icon && <span style={{ color: '#f44336', fontSize: '0.85rem' }}>Required</span>}
-                          </FormGroup>
-                          <FormGroup>
-                            <Label>Original Price (₹) *</Label>
-                            <Input type="number" {...register('originalPrice', { required: true, min: 0 })} />
-                            {errors.originalPrice && <span style={{ color: '#f44336', fontSize: '0.85rem' }}>Required</span>}
-                          </FormGroup>
-                          <FormGroup>
-                            <Label>Discounted Price (₹) *</Label>
-                            <Input type="number" {...register('price', { required: true, min: 0 })} />
-                            {errors.price && <span style={{ color: '#f44336', fontSize: '0.85rem' }}>Required</span>}
-                          </FormGroup>
-                          <CheckboxLabel>
-                            <Checkbox type="checkbox" {...register('popular')} />
-                            Mark as Popular
-                          </CheckboxLabel>
-                        </FormGrid>
-                      </FormSection>
+                    <FormSection>
+                      <SectionTitle>Combo Packages</SectionTitle>
+                      <DynamicList>
+                        {combos.map((combo, comboIndex) => (
+                          <div key={comboIndex} style={{ border: '1px solid rgba(236, 236, 236, 0.1)', borderRadius: '8px', padding: '15px', marginBottom: '15px' }}>
+                            <FormGrid>
+                              <FormGroup>
+                                <Label>Package Name *</Label>
+                                <Input
+                                  placeholder="e.g., Starter Shield"
+                                  value={combo.name}
+                                  onChange={(e) => updateCombo(comboIndex, 'name', e.target.value)}
+                                />
+                              </FormGroup>
+                              <FormGroup>
+                                <Label>Icon *</Label>
+                                <Input
+                                  placeholder="e.g., fa-solid fa-layer-group"
+                                  value={combo.icon}
+                                  onChange={(e) => updateCombo(comboIndex, 'icon', e.target.value)}
+                                />
+                              </FormGroup>
+                              <FormGroup>
+                                <Label>Original Price (₹) *</Label>
+                                <Input
+                                  type="number"
+                                  value={combo.originalPrice}
+                                  onChange={(e) => updateCombo(comboIndex, 'originalPrice', e.target.value)}
+                                />
+                              </FormGroup>
+                              <FormGroup>
+                                <Label>Discounted Price (₹) *</Label>
+                                <Input
+                                  type="number"
+                                  value={combo.price}
+                                  onChange={(e) => updateCombo(comboIndex, 'price', e.target.value)}
+                                />
+                              </FormGroup>
+                              <CheckboxLabel>
+                                <Checkbox
+                                  type="checkbox"
+                                  checked={combo.popular}
+                                  onChange={(e) => updateCombo(comboIndex, 'popular', e.target.checked)}
+                                />
+                                Mark as Popular
+                              </CheckboxLabel>
+                            </FormGrid>
 
-                      <FormSection>
-                        <SectionTitle>Included Services</SectionTitle>
-                        <DynamicList>
-                          {features.map((feature, index) => (
-                            <DynamicItem key={index}>
-                              <Input
-                                placeholder="Service Name (e.g., Basic PPF)"
-                                value={feature}
-                                onChange={(e) => updateFeature(index, e.target.value)}
-                              />
-                              <RemoveButton type="button" onClick={() => removeFeature(index)}>
-                                <i className="fas fa-times"></i>
-                              </RemoveButton>
-                            </DynamicItem>
-                          ))}
-                        </DynamicList>
-                        <AddItemButton type="button" onClick={addFeature}>
-                          <i className="fas fa-plus"></i> Add Service
-                        </AddItemButton>
-                      </FormSection>
-                    </>
+                            <div style={{ marginTop: '15px' }}>
+                              <Label>Included Services</Label>
+                              <DynamicList>
+                                {combo.includes?.map((service, serviceIndex) => (
+                                  <DynamicItem key={serviceIndex}>
+                                    <Input
+                                      placeholder="Service Name (e.g., Basic PPF)"
+                                      value={service}
+                                      onChange={(e) => updateComboService(comboIndex, serviceIndex, e.target.value)}
+                                    />
+                                    <RemoveButton type="button" onClick={() => removeComboService(comboIndex, serviceIndex)}>
+                                      <i className="fas fa-times"></i>
+                                    </RemoveButton>
+                                  </DynamicItem>
+                                ))}
+                              </DynamicList>
+                              <AddItemButton type="button" onClick={() => addComboService(comboIndex)}>
+                                <i className="fas fa-plus"></i> Add Service
+                              </AddItemButton>
+                            </div>
+
+                            <RemoveButton type="button" onClick={() => removeCombo(comboIndex)} style={{ marginTop: '10px', width: '100%' }}>
+                              <i className="fas fa-trash"></i> Remove Package
+                            </RemoveButton>
+                          </div>
+                        ))}
+                      </DynamicList>
+                      <AddItemButton type="button" onClick={addCombo}>
+                        <i className="fas fa-plus"></i> Add Combo Package
+                      </AddItemButton>
+                    </FormSection>
                   ) : (
                     <>
                       <FormSection>
@@ -322,9 +412,27 @@ const Services = () => {
                             {errors.category && <span style={{ color: '#f44336', fontSize: '0.85rem' }}>Required</span>}
                           </FormGroup>
                           <FormGroup style={{ gridColumn: '1 / -1' }}>
-                            <Label>Image URL *</Label>
-                            <Input {...register('image', { required: true })} />
-                            {errors.image && <span style={{ color: '#f44336', fontSize: '0.85rem' }}>Required</span>}
+                            <Label>Service Image *</Label>
+                            <div style={{ display: 'flex', gap: '15px', alignItems: 'flex-start' }}>
+                              <div style={{ flex: 1 }}>
+                                <Input 
+                                  type="file" 
+                                  accept="image/*"
+                                  onChange={handleImageChange}
+                                  style={{ padding: '8px' }}
+                                />
+                                <small style={{ color: '#999', marginTop: '5px', display: 'block' }}>
+                                  {imageFile ? imageFile.name : 'Choose an image file'}
+                                </small>
+                              </div>
+                              {imagePreview && (
+                                <img 
+                                  src={imagePreview} 
+                                  alt="Preview" 
+                                  style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '4px' }}
+                                />
+                              )}
+                            </div>
                           </FormGroup>
                           <FormGroup style={{ gridColumn: '1 / -1' }}>
                             <Label>Description *</Label>

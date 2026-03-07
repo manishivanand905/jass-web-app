@@ -30,4 +30,3 @@ export const howItWorksData = {
   ],
 };
 
-export default howItWorksData;

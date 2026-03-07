@@ -8,8 +8,6 @@ import { theme } from "./styles/theme";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { BookingModalProvider } from "./hooks/useNewBookingModal";
-import NewBookingModal from "./components/user/NewBookingModal/NewBookingModal";
-
 import Cart from "./pages/user/Cart/Cart";
 import Checkout from "./pages/user/Checkout/Checkout";
 import OrderConfirmation from "./pages/user/OrderConfirmation/OrderConfirmation";
@@ -34,6 +32,8 @@ import Profile from "./pages/user/Profile/Profile";
 import MyBookings from "./pages/user/MyBookings/MyBookings";
 import BookingConfirmation from "./pages/user/BookingConfirmation/BookingConfirmation";
 import NotFound from "./pages/user/NotFound/NotFound";
+
+const NewBookingModal = React.lazy(() => import("./components/user/NewBookingModal/NewBookingModal"));
 
 const App = () => {
   return (
@@ -71,7 +71,9 @@ const App = () => {
               <Route path="*" element={<NotFound />} />
             </Routes>
             <ScrollUp />
-            <NewBookingModal />
+            <React.Suspense fallback={null}>
+              <NewBookingModal />
+            </React.Suspense>
             <ToastContainer
               position="top-right"
               autoClose={3000}

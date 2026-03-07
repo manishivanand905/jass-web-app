@@ -8,11 +8,12 @@ import { useEffect } from 'react';
  * @param {boolean} triggerOnce - Whether animation should trigger only once
  * @returns {object} - { ref, controls, inView }
  */
-export const useScrollAnimation = (threshold = 0.2, triggerOnce = true) => {
+export const useScrollAnimation = (threshold = 0.15, triggerOnce = true) => {
   const controls = useAnimation();
   const [ref, inView] = useInView({
     threshold,
     triggerOnce,
+    rootMargin: '-50px 0px',
   });
 
   useEffect(() => {
@@ -32,11 +33,12 @@ export const useScrollAnimation = (threshold = 0.2, triggerOnce = true) => {
  * @param {number} staggerDelay - Delay between each child animation
  * @returns {object} - { ref, controls, inView }
  */
-export const useStaggerAnimation = (threshold = 0.2, staggerDelay = 0.1) => {
+export const useStaggerAnimation = (threshold = 0.15, staggerDelay = 0.2) => {
   const controls = useAnimation();
   const [ref, inView] = useInView({
     threshold,
     triggerOnce: true,
+    rootMargin: '-30px 0px',
   });
 
   useEffect(() => {

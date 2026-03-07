@@ -5,7 +5,9 @@ import AnimatedSection from "../../../components/common/AnimatedSection/Animated
 import { staggerContainer, staggerItem } from "../../../animations/variants";
 import { useScrollAnimation } from "../../../hooks/useScrollAnimation";
 import { useBookingModal } from "../../../hooks/useNewBookingModal";
-import { servicesData } from "../../../data/servicesData";
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 import {
   ServicesWrapper,
@@ -62,12 +64,46 @@ import {
 
 const Services = () => {
   const { openModal } = useBookingModal();
+  const navigate = useNavigate();
+  const [services, setServices] = useState([]);
+  const [combos, setCombos] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const { ref: statsRef, controls: statsControls } = useScrollAnimation(0.3);
-  const { ref: comboRef, controls: comboControls } = useScrollAnimation(0.2);
+  const { ref: statsRef, controls: statsControls } = useScrollAnimation(0.2);
+  const { ref: comboRef, controls: comboControls } = useScrollAnimation(0.15);
 
-  // ✅ STEP 2 — Correct structure
-  const { services, combos } = servicesData;
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  const fetchServices = async () => {
+    try {
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      const { data } = await axios.get(`${apiUrl}/api/services`);
+      const normalServices = data.filter(s => s.category !== 'combo');
+      const comboServices = data.filter(s => s.category === 'combo');
+      const allCombos = comboServices.flatMap(s => s.combos || []);
+      setServices(normalServices);
+      setCombos(allCombos);
+    } catch (error) {
+      console.error('Failed to fetch services');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Sidebar type="user">
+        <ServicesWrapper>
+          <div style={{ textAlign: 'center', padding: '100px 20px', color: 'rgba(236, 236, 236, 0.4)' }}>
+            <i className="fas fa-spinner fa-spin" style={{ fontSize: '3rem' }}></i>
+          </div>
+        </ServicesWrapper>
+        <Footer />
+      </Sidebar>
+    );
+  }
 
   return (
     <Sidebar type="user">
@@ -124,17 +160,17 @@ const Services = () => {
           </StatsStrip>
         </motion.div>
 
-        {/* 🔥 DYNAMIC SERVICES */}
-        {services.map((service, index) => {
+        {/* DYNAMIC SERVICES */}
+        {services.length > 0 ? services.map((service, index) => {
           const isReverse = index % 2 !== 0;
           const titleParts = service.title.split(" ");
 
           return (
-            <ServiceSection key={service.id} $reverse={isReverse}>
+            <ServiceSection key={service._id} $reverse={isReverse}>
               <ServiceGrid $reverse={isReverse}>
                 {/* IMAGE LEFT */}
                 {!isReverse && (
-                  <AnimatedSection animation="fadeInLeft">
+                  <AnimatedSection animation="fadeInLeft" delay={0.2}>
                     <ImagePanel>
                       <ServiceImage src={service.image} alt={service.title} />
                       <ImageBadge>{service.title.toUpperCase()}</ImageBadge>
@@ -145,12 +181,11 @@ const Services = () => {
                 {/* CONTENT */}
                 <AnimatedSection
                   animation={isReverse ? "fadeInLeft" : "fadeInRight"}
-                  delay={0.2}
+                  delay={0.4}
                 >
                   <ContentPanel>
-                    {/* ✅ STEP 3 — Auto SERVICE 01 */}
                     <ServiceEyebrow>
-                      SERVICE {String(service.id).padStart(2, "0")}
+                      SERVICE {String(index + 1).padStart(2, "0")}
                     </ServiceEyebrow>
 
                     <ServiceTitle>
@@ -163,8 +198,8 @@ const Services = () => {
                     </ServiceDescription>
 
                     <TiersRow>
-                      {service.tiers.map((tier) => (
-                        <TierCard key={tier.id}>
+                      {service.tiers?.map((tier) => (
+                        <TierCard key={tier._id}>
                           <TierIcon>
                             <i className={tier.icon} />
                           </TierIcon>
@@ -179,7 +214,10 @@ const Services = () => {
                             onClick={() =>
                               openModal({
                                 category: service.category,
+                                serviceName: service.title,
                                 tier: tier.tier,
+                                tierName: tier.name,
+                                price: tier.price
                               })
                             }
                           >
@@ -190,7 +228,7 @@ const Services = () => {
                     </TiersRow>
 
                     <BenefitsList>
-                      {service.benefits.map((benefit, i) => (
+                      {service.benefits?.map((benefit, i) => (
                         <BenefitItem key={i}>
                           <i className="fa-solid fa-check" />
                           {benefit}
@@ -202,7 +240,7 @@ const Services = () => {
 
                 {/* IMAGE RIGHT */}
                 {isReverse && (
-                  <AnimatedSection animation="fadeInRight">
+                  <AnimatedSection animation="fadeInRight" delay={0.2}>
                     <ImagePanel>
                       <ServiceImage src={service.image} alt={service.title} />
                       <ImageBadge>{service.title.toUpperCase()}</ImageBadge>
@@ -212,9 +250,9 @@ const Services = () => {
               </ServiceGrid>
             </ServiceSection>
           );
-        })}
+        }) : <div style={{ textAlign: 'center', padding: '50px 20px', color: 'rgba(236, 236, 236, 0.4)' }}>No services available</div>}
 
-        {/* 🔥 COMBO SECTION */}
+        {/* COMBO SECTION */}
         <ComboSection>
           <AnimatedSection animation="fadeInUp">
             <ComboHeader>
@@ -232,8 +270,8 @@ const Services = () => {
             variants={staggerContainer}
           >
             <ComboGrid>
-              {combos.map((combo) => (
-                <motion.div key={combo.id} variants={staggerItem}>
+              {combos.length > 0 ? combos.map((combo) => (
+                <motion.div key={combo._id} variants={staggerItem}>
                   <ComboCard $popular={combo.popular}>
                     {combo.popular && <PopularBadge>MOST POPULAR</PopularBadge>}
 
@@ -246,7 +284,7 @@ const Services = () => {
                     <ComboName>{combo.name}</ComboName>
 
                     <ComboIncludes>
-                      {combo.includes.map((item, i) => (
+                      {combo.includes?.map((item, i) => (
                         <li key={i}>
                           <i className="fa-solid fa-check" />
                           {item}
@@ -264,13 +302,20 @@ const Services = () => {
                     </ComboPricing>
 
                     <ComboButton
-                      onClick={() => openModal({ category: "combo" })}
+                      onClick={() => openModal({
+                        category: "combo",
+                        serviceName: combo.name,
+                        tierName: combo.includes?.join(', ') || 'Combo Package',
+                        price: combo.price,
+                        originalPrice: combo.originalPrice,
+                        isCombo: true
+                      })}
                     >
                       BOOK NOW
                     </ComboButton>
                   </ComboCard>
                 </motion.div>
-              ))}
+              )) : <div style={{ textAlign: 'center', padding: '50px 20px', color: 'rgba(236, 236, 236, 0.4)' }}>No combo packages available</div>}
             </ComboGrid>
           </motion.div>
         </ComboSection>
@@ -289,9 +334,9 @@ const Services = () => {
               </CTASubtitle>
 
               <CTAButtons>
-                <PrimaryButton onClick={openModal}>
-                  <i className="fa-solid fa-calendar-check" />
-                  BOOK A SERVICE
+                <PrimaryButton onClick={() => navigate('/products')}>
+                  <i className="fa-solid fa-box" />
+                  VIEW PRODUCTS
                 </PrimaryButton>
 
                 <SecondaryButton>

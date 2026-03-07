@@ -8,7 +8,7 @@ export const SidebarContainer = styled.aside`
   background: #0a0a0a;
   border-right: 1px solid rgba(204, 0, 0, 0.2);
   z-index: 1000;
-  transition: width 0.3s ease;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   width: ${props => props.$isOpen ? '240px' : '70px'};
   overflow: hidden;
   cursor: pointer;
@@ -36,7 +36,7 @@ export const NavLink = styled.a`
   font-family: 'Barlow Condensed', Arial, sans-serif;
   font-size: 15px;
   letter-spacing: 0.05em;
-  transition: all 0.3s;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   position: relative;
 
@@ -49,7 +49,7 @@ export const NavLink = styled.a`
     width: 3px;
     background: #cc0000;
     transform: scaleY(0);
-    transition: transform 0.3s;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   &:hover {
@@ -82,14 +82,14 @@ export const NavLink = styled.a`
   i {
     font-size: 20px;
     min-width: 30px;
-    transition: all 0.3s;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   span {
     margin-left: 15px;
     white-space: nowrap;
     opacity: ${props => props.$isOpen ? '1' : '0'};
-    transition: opacity 0.3s;
+    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 `;
 
@@ -100,7 +100,7 @@ export const ProfileSection = styled.div`
   right: 0;
   padding: 15px 0 0 0;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  transition: opacity 0.3s;
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 `;
 
 export const ProfileCard = styled.div`
@@ -108,7 +108,7 @@ export const ProfileCard = styled.div`
   align-items: center;
   padding: 12px 15px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   gap: 12px;
 
   &:hover {
@@ -137,7 +137,7 @@ export const ProfileInfo = styled.div`
   flex-direction: column;
   gap: 2px;
   opacity: ${props => props.$isOpen ? '1' : '0'};
-  transition: opacity 0.3s;
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
 `;
 
@@ -206,7 +206,7 @@ export const ProfileMenuItem = styled.div`
 export const PageWrapper = styled.div`
   margin-left: ${props => props.$isOpen ? '240px' : '70px'};
   margin-top: 70px;
-  transition: margin-left 0.3s ease;
+  transition: margin-left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: calc(100vh - 70px);
   width: calc(100% - ${props => props.$isOpen ? '240px' : '70px'});
   background: #0d0d0d;

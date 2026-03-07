@@ -1,8 +1,20 @@
 const Contact = require('../models/Contact');
+const { createNotificationForAdmin } = require('./notificationController');
 
 exports.createContact = async (req, res) => {
   try {
     const contact = await Contact.create(req.body);
+    
+    // Create notification for admin
+    await createNotificationForAdmin(
+      'new_contact',
+      'New Contact Request!',
+      `${contact.name} sent a message: "${contact.message.substring(0, 50)}..."`,
+      'fa-solid fa-envelope',
+      contact._id,
+      'Contact'
+    );
+    
     res.status(201).json({ success: true, contact, message: 'Message sent successfully' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

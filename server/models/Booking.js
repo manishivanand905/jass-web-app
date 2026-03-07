@@ -9,10 +9,13 @@ const bookingSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },
+  service: {
+    type: String,
+    required: true
+  },
   serviceType: {
     type: String,
-    required: true,
-    enum: ['ppf', 'ceramic', 'combo']
+    required: true
   },
   serviceTier: {
     type: String,
@@ -44,6 +47,11 @@ const bookingSchema = new mongoose.Schema({
   },
   carType: String,
   carColor: String,
+  pickupOption: {
+    type: String,
+    enum: ['pickup', 'drop'],
+    default: 'pickup'
+  },
   customerName: {
     type: String,
     required: true
@@ -59,6 +67,13 @@ const bookingSchema = new mongoose.Schema({
   totalAmount: {
     type: Number,
     required: true
+  },
+  isCombo: {
+    type: Boolean,
+    default: false
+  },
+  originalPrice: {
+    type: Number
   },
   status: {
     type: String,
@@ -76,8 +91,21 @@ const bookingSchema = new mongoose.Schema({
 bookingSchema.pre('save', async function(next) {
   if (!this.bookingId) {
     const year = new Date().getFullYear();
-    const count = await mongoose.model('Booking').countDocuments();
-    this.bookingId = `JASS-${year}-${String(count + 1).padStart(3, '0')}`;
+    let isUnique = false;
+    let counter = 1;
+    
+    while (!isUnique) {
+      const count = await mongoose.model('Booking').countDocuments();
+      const potentialId = `JASS-${year}-${String(count + counter).padStart(3, '0')}`;
+      
+      const existing = await mongoose.model('Booking').findOne({ bookingId: potentialId });
+      if (!existing) {
+        this.bookingId = potentialId;
+        isUnique = true;
+      } else {
+        counter++;
+      }
+    }
   }
   next();
 });

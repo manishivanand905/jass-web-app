@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
-  orderId: { type: String, unique: true },
+  orderId: { type: String, unique: true, sparse: true },
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   items: [{
     product: { type: String, required: true },
@@ -29,11 +29,16 @@ const orderSchema = new mongoose.Schema({
 
 orderSchema.pre('save', async function(next) {
   if (!this.orderId) {
-    const year = new Date().getFullYear();
-    const count = await mongoose.model('Order').countDocuments();
-    this.orderId = `ORD-${year}-${String(count + 1).padStart(4, '0')}`;
+    try {
+      const year = new Date().getFullYear();
+      const count = await mongoose.model('Order').countDocuments({ orderId: { $regex: `ORD-${year}` } });
+      this.orderId = `ORD-${year}-${String(count + 1).padStart(4, '0')}`;
+    } catch (error) {
+      next(error);
+      return;
+    }
   }
-  next();
+  next()
 });
 
 module.exports = mongoose.model('Order', orderSchema);

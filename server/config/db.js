@@ -1,12 +1,26 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const connectDB = async () => {
+  if (!process.env.MONGODB_URI) {
+    throw new Error("MONGODB_URI is missing in environment variables");
+  }
+
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log('MongoDB Connected Successfully');
+    const dbName = process.env.MONGODB_DB_NAME || "jass_automotives";
+
+    await mongoose.connect(process.env.MONGODB_URI, {
+      dbName,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    });
+    console.log(`MongoDB connected successfully (db: ${dbName})`);
   } catch (error) {
-    console.error('MongoDB Connection Error:', error.message);
-    process.exit(1);
+    if (error.message?.includes("querySrv")) {
+      console.error(
+        "MongoDB DNS lookup failed for SRV record. Check DNS/firewall or use a non-SRV Atlas connection string.",
+      );
+    }
+    throw error;
   }
 };
 

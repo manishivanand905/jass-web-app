@@ -1,11 +1,81 @@
 const Booking = require('../models/Booking');
+const { sendBookingConfirmationEmail, sendBookingStatusUpdateEmail } = require('../services/emailService');
+const User = require('../models/User');
+const Service = require('../models/Service');
+const { createNotificationForUser, createNotificationForAdmin } = require('./notificationController');
 
 exports.createBooking = async (req, res) => {
   try {
-    const booking = await Booking.create({ ...req.body, user: req.user?._id });
+    console.log('Create booking - req.user:', req.user);
+    const userId = req.user?._id;
+    if (!userId) {
+      console.log('No user ID found');
+      return res.status(401).json({ success: false, message: 'User not authenticated' });
+    }
+    
+    const bookingData = {
+      ...req.body,
+      user: userId,
+      status: 'pending',
+      isCombo: req.body.isCombo || false,
+      originalPrice: req.body.originalPrice || null
+    };
+
+    console.log('Creating booking with user ID:', userId);
+    const booking = await Booking.create(bookingData);
+    console.log('Booking created with ID:', booking._id, 'User:', booking.user);
+    
+    const user = await User.findById(userId);
+    
+    // Find service to get image
+    let serviceImage = 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=200&fit=crop';
+    try {
+      if (booking.isCombo) {
+        // For combo packages, find the combo service
+        const comboService = await Service.findOne({ category: 'combo' });
+        if (comboService && comboService.image) {
+          serviceImage = comboService.image;
+        }
+      } else {
+        // For regular services, find by title
+        const service = await Service.findOne({ title: booking.service });
+        if (service && service.image) {
+          serviceImage = service.image;
+        }
+      }
+    } catch (error) {
+      console.log('Could not fetch service image:', error.message);
+    }
+    
+    if (user) {
+      sendBookingConfirmationEmail(booking, user, serviceImage);
+    }
+
+    // Create notification for user
+    await createNotificationForUser(
+      userId,
+      'booking_confirmation',
+      'Booking Confirmed!',
+      `Your ${booking.servicePackage} booking for ${new Date(booking.date).toLocaleDateString()} has been confirmed.`,
+      'fa-solid fa-calendar-check',
+      booking._id,
+      'Booking'
+    );
+
+    // Create notification for admin
+    await createNotificationForAdmin(
+      'new_booking',
+      'New Booking Received!',
+      `${booking.service} booking by ${booking.customerName} for ${new Date(booking.date).toLocaleDateString()}`,
+      'fa-solid fa-calendar-plus',
+      booking._id,
+      'Booking'
+    );
+    
     res.status(201).json({ success: true, booking, bookingRef: booking.bookingId });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error('Booking creation error:', error.message);
+    res.status(400).json({ success: false, message: error.message });
   }
 };
 
@@ -31,6 +101,8 @@ exports.getBookings = async (req, res) => {
       .skip((page - 1) * limit)
       .sort({ createdAt: -1 });
 
+    console.log('Admin fetching bookings, found:', bookings.length, 'User IDs:', bookings.map(b => b.user?._id));
+
     res.json({
       success: true,
       bookings,
@@ -45,7 +117,13 @@ exports.getBookings = async (req, res) => {
 
 exports.getUserBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find({ user: req.user._id }).sort({ createdAt: -1 });
+    const userId = req.user._id;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'User not authenticated' });
+    }
+    console.log('Fetching bookings for user:', userId);
+    const bookings = await Booking.find({ user: userId }).sort({ createdAt: -1 });
+    console.log('Found bookings:', bookings.length);
     res.json({ success: true, bookings });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -75,6 +153,12 @@ exports.updateBookingStatus = async (req, res) => {
     if (!booking) {
       return res.status(404).json({ success: false, message: 'Booking not found' });
     }
+    
+    const user = await User.findById(booking.user);
+    if (user) {
+      sendBookingStatusUpdateEmail(booking, user);
+    }
+    
     res.json({ success: true, booking });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
