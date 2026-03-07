@@ -32,6 +32,8 @@ import Profile from "./pages/user/Profile/Profile";
 import MyBookings from "./pages/user/MyBookings/MyBookings";
 import BookingConfirmation from "./pages/user/BookingConfirmation/BookingConfirmation";
 import NotFound from "./pages/user/NotFound/NotFound";
+import ProtectedRoute from "./components/user/ProtectedRoute/ProtectedRoute";
+import AdminProtectedRoute from "./components/admin/ProtectedRoute/AdminProtectedRoute";
 
 const NewBookingModal = React.lazy(() => import("./components/user/NewBookingModal/NewBookingModal"));
 
@@ -53,21 +55,27 @@ const App = () => {
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/order/confirmation/:orderId" element={<OrderConfirmation />} />
-              <Route path="/my-orders" element={<MyOrders />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/my-bookings" element={<MyBookings />} />
               <Route path="/login" element={<UserAuth />} />
               <Route path="/register" element={<UserAuth />} />
               <Route path="/booking/confirmation/:id" element={<BookingConfirmation />} />
               <Route path="/admin/auth" element={<AdminAuth />} />
               <Route path="/admin/login" element={<AdminAuth />} />
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/products" element={<AdminProducts />} />
-              <Route path="/admin/services" element={<AdminServices />} />
-              <Route path="/admin/bookings" element={<AdminBookings />} />
-              <Route path="/admin/orders" element={<AdminOrders />} />
-              <Route path="/admin/contacts" element={<AdminContacts />} />
-              <Route path="/admin/timeslots" element={<AdminTimeSlots />} />
+
+              <Route element={<ProtectedRoute />}>
+                <Route path="/my-orders" element={<MyOrders />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/my-bookings" element={<MyBookings />} />
+              </Route>
+
+              <Route element={<AdminProtectedRoute />}>
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/products" element={<AdminProducts />} />
+                <Route path="/admin/services" element={<AdminServices />} />
+                <Route path="/admin/bookings" element={<AdminBookings />} />
+                <Route path="/admin/orders" element={<AdminOrders />} />
+                <Route path="/admin/contacts" element={<AdminContacts />} />
+                <Route path="/admin/timeslots" element={<AdminTimeSlots />} />
+              </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
             <ScrollUp />

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../../components/admin/AdminLayout/AdminLayout';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -9,27 +10,38 @@ import {
 } from './DashboardStyles';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const token = localStorage.getItem('adminToken');
+      if (!token) {
+        navigate('/admin/login', { replace: true });
+        return;
+      }
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
       const { data } = await axios.get(`${apiUrl}/api/admin/stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setStats(data);
     } catch (error) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminData');
+        navigate('/admin/login', { replace: true });
+        return;
+      }
       toast.error('Failed to fetch stats');
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
 
   const getStatusColor = (status) => {
     const colors = {
