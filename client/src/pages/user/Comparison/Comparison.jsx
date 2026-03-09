@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../../../components/common/Sidebar/Sidebar";
-import Footer from "../../../components/common/Footer/Footer";
 
 import {
   ppfBrands,
@@ -42,6 +42,13 @@ import {
   CeramicTitle,
   CeramicBadge,
   VisualHeader,
+  CTABanner,
+  CTAContent,
+  CTATitle,
+  CTASubtitle,
+  CTAButtons,
+  PrimaryButton,
+  SecondaryButton,
 } from "./ComparisonStyles";
 
 // ─── Scroll Reveal ─────────────────────────
@@ -70,6 +77,7 @@ const useScrollReveal = () => {
 // ─── Component ─────────────────────────────
 const Comparison = () => {
   useScrollReveal();
+  const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState("ppf");
 
@@ -234,9 +242,32 @@ const Comparison = () => {
             </TableBody>
           </ComparisonTable>
         </TableWrapper>
-      </ComparisonWrapper>
 
-      <Footer />
+        <CTABanner>
+          <CTAContent>
+            <CTATitle>
+              READY TO PROTECT <span>YOUR VEHICLE?</span>
+            </CTATitle>
+
+            <CTASubtitle>
+              Book your service today and experience premium automotive
+              protection
+            </CTASubtitle>
+
+            <CTAButtons>
+              <PrimaryButton onClick={() => navigate("/products")}>
+                <i className="fa-solid fa-box" />
+                VIEW PRODUCTS
+              </PrimaryButton>
+
+              <SecondaryButton onClick={() => navigate("/contact")}>
+                <i className="fa-solid fa-phone" />
+                CONTACT US
+              </SecondaryButton>
+            </CTAButtons>
+          </CTAContent>
+        </CTABanner>
+      </ComparisonWrapper>
     </Sidebar>
   );
 };

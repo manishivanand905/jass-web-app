@@ -105,6 +105,20 @@ export const StatsStrip = styled.div`
   }
 `;
 
+export const DesktopStatsOnly = styled.div`
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+export const MobileStatsOnly = styled.div`
+  display: none;
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+`;
+
 export const StatBlock = styled.div`
   text-align: center;
 `;
@@ -156,6 +170,18 @@ export const ServiceGrid = styled.div`
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
     gap: 40px;
+  }
+`;
+
+export const ServiceImageSlot = styled.div`
+  @media (max-width: 1024px) {
+    order: 1;
+  }
+`;
+
+export const ServiceContentSlot = styled.div`
+  @media (max-width: 1024px) {
+    order: 2;
   }
 `;
 

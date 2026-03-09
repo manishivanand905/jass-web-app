@@ -449,3 +449,9 @@ export const SecondaryButton = styled.button`
     font-size: 16px;
   }
 `;
+
+export const FooterFix = styled.div`
+  @media (max-width: 1024px) {
+    margin-bottom: -70px;
+  }
+`;

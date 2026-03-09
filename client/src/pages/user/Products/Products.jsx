@@ -4,7 +4,6 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { API_BASE } from "../../../config/api";
 import Sidebar from "../../../components/common/Sidebar/Sidebar";
-import Footer from "../../../components/common/Footer/Footer";
 import {
   ProductsWrapper,
   HeroSection,
@@ -290,7 +289,6 @@ const Products = () => {
           </EmptyState>
         )}
       </ProductsWrapper>
-      <Footer />
     </Sidebar>
   );
 };

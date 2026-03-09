@@ -76,16 +76,22 @@ export const HeaderContainer = styled.header`
     padding: 0 16px;
     height: 60px;
   }
+
+  @media (max-width: 420px) {
+    padding: 0 10px;
+    height: 56px;
+  }
 `;
 
 // ─── Logo ─────────────────────────────────────────────────────────────────────
 export const Logo = styled.div`
   cursor: pointer;
-  flex-shrink: 0;
+  flex-shrink: 1;
   position: relative;
   display: flex;
   align-items: center;
   transition: all 0.3s ease;
+  min-width: 0;
 
   img {
     height: 44px;
@@ -123,6 +129,16 @@ export const Logo = styled.div`
       height: 36px;
     }
   }
+
+  @media (max-width: 420px) {
+    max-width: 42vw;
+
+    img {
+      max-height: 30px;
+      width: 100%;
+      object-fit: contain;
+    }
+  }
 `;
 
 // ─── Right Controls ───────────────────────────────────────────────────────────
@@ -131,6 +147,10 @@ export const RightSection = styled.div`
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+
+  @media (max-width: 420px) {
+    gap: 4px;
+  }
 `;
 
 // ─── Divider ──────────────────────────────────────────────────────────────────
@@ -139,6 +159,10 @@ export const NavDivider = styled.div`
   height: 20px;
   background: rgba(255, 255, 255, 0.1);
   flex-shrink: 0;
+
+  @media (max-width: 420px) {
+    display: none;
+  }
 `;
 
 // ─── Search ───────────────────────────────────────────────────────────────────
@@ -173,6 +197,10 @@ export const SearchBar = styled.div`
   @media (max-width: 767px) {
     width: ${({ $expanded }) => ($expanded ? "160px" : "34px")};
   }
+
+  @media (max-width: 420px) {
+    width: ${({ $expanded }) => ($expanded ? "130px" : "30px")};
+  }
 `;
 
 export const SearchIcon = styled.button`
@@ -205,6 +233,11 @@ export const SearchIcon = styled.button`
     width: 34px;
     height: 32px;
   }
+
+  @media (max-width: 420px) {
+    width: 30px;
+    height: 30px;
+  }
 `;
 
 export const SearchInput = styled.input`
@@ -229,6 +262,11 @@ export const SearchInput = styled.input`
 
   @media (max-width: 767px) {
     width: ${({ $expanded }) => ($expanded ? "110px" : "0")};
+  }
+
+  @media (max-width: 420px) {
+    width: ${({ $expanded }) => ($expanded ? "82px" : "0")};
+    font-size: 0.75rem;
   }
 `;
 
@@ -384,6 +422,11 @@ export const QuickBookBtn = styled.button`
       display: none;
     }
   }
+
+  @media (max-width: 420px) {
+    height: 30px;
+    padding: 0 8px;
+  }
 `;
 
 // ─── Auth Button ──────────────────────────────────────────────────────────────
@@ -460,5 +503,11 @@ export const AuthButton = styled.button`
     .btn-label {
       display: none;
     }
+  }
+
+  @media (max-width: 420px) {
+    width: 30px;
+    height: 30px;
+    padding: 0;
   }
 `;

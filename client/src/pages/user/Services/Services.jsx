@@ -1,5 +1,4 @@
 import Sidebar from "../../../components/common/Sidebar/Sidebar";
-import Footer from "../../../components/common/Footer/Footer";
 import { motion } from "framer-motion";
 import AnimatedSection from "../../../components/common/AnimatedSection/AnimatedSection";
 import { staggerContainer, staggerItem } from "../../../animations/variants";
@@ -19,12 +18,16 @@ import {
   HeroTitle,
   HeroSubtitle,
   StatsStrip,
+  DesktopStatsOnly,
+  MobileStatsOnly,
   StatBlock,
   StatNumber,
   StatLabel,
   StatDivider,
   ServiceSection,
   ServiceGrid,
+  ServiceImageSlot,
+  ServiceContentSlot,
   ImagePanel,
   ServiceImage,
   ImageBadge,
@@ -100,7 +103,6 @@ const Services = () => {
             <i className="fas fa-spinner fa-spin" style={{ fontSize: '3rem' }}></i>
           </div>
         </ServicesWrapper>
-        <Footer />
       </Sidebar>
     );
   }
@@ -126,39 +128,41 @@ const Services = () => {
         </AnimatedSection>
 
         {/* STATS STRIP */}
-        <motion.div
-          ref={statsRef}
-          initial="hidden"
-          animate={statsControls}
-          variants={staggerContainer}
-        >
-          <StatsStrip>
-            <motion.div variants={staggerItem}>
-              <StatBlock>
-                <StatNumber>50+</StatNumber>
-                <StatLabel>Vehicles Protected</StatLabel>
-              </StatBlock>
-            </motion.div>
+        <DesktopStatsOnly>
+          <motion.div
+            ref={statsRef}
+            initial="hidden"
+            animate={statsControls}
+            variants={staggerContainer}
+          >
+            <StatsStrip>
+              <motion.div variants={staggerItem}>
+                <StatBlock>
+                  <StatNumber>50+</StatNumber>
+                  <StatLabel>Vehicles Protected</StatLabel>
+                </StatBlock>
+              </motion.div>
 
-            <StatDivider />
+              <StatDivider />
 
-            <motion.div variants={staggerItem}>
-              <StatBlock>
-                <StatNumber>3 Years</StatNumber>
-                <StatLabel>Industry Experience</StatLabel>
-              </StatBlock>
-            </motion.div>
+              <motion.div variants={staggerItem}>
+                <StatBlock>
+                  <StatNumber>3 Years</StatNumber>
+                  <StatLabel>Industry Experience</StatLabel>
+                </StatBlock>
+              </motion.div>
 
-            <StatDivider />
+              <StatDivider />
 
-            <motion.div variants={staggerItem}>
-              <StatBlock>
-                <StatNumber>100%</StatNumber>
-                <StatLabel>Satisfaction Guaranteed</StatLabel>
-              </StatBlock>
-            </motion.div>
-          </StatsStrip>
-        </motion.div>
+              <motion.div variants={staggerItem}>
+                <StatBlock>
+                  <StatNumber>100%</StatNumber>
+                  <StatLabel>Satisfaction Guaranteed</StatLabel>
+                </StatBlock>
+              </motion.div>
+            </StatsStrip>
+          </motion.div>
+        </DesktopStatsOnly>
 
         {/* DYNAMIC SERVICES */}
         {services.length > 0 ? services.map((service, index) => {
@@ -170,20 +174,23 @@ const Services = () => {
               <ServiceGrid $reverse={isReverse}>
                 {/* IMAGE LEFT */}
                 {!isReverse && (
-                  <AnimatedSection animation="fadeInLeft" delay={0.2}>
-                    <ImagePanel>
-                      <ServiceImage src={service.image} alt={service.title} />
-                      <ImageBadge>{service.title.toUpperCase()}</ImageBadge>
-                    </ImagePanel>
-                  </AnimatedSection>
+                  <ServiceImageSlot>
+                    <AnimatedSection animation="fadeInLeft" delay={0.2}>
+                      <ImagePanel>
+                        <ServiceImage src={service.image} alt={service.title} />
+                        <ImageBadge>{service.title.toUpperCase()}</ImageBadge>
+                      </ImagePanel>
+                    </AnimatedSection>
+                  </ServiceImageSlot>
                 )}
 
                 {/* CONTENT */}
-                <AnimatedSection
-                  animation={isReverse ? "fadeInLeft" : "fadeInRight"}
-                  delay={0.4}
-                >
-                  <ContentPanel>
+                <ServiceContentSlot>
+                  <AnimatedSection
+                    animation={isReverse ? "fadeInLeft" : "fadeInRight"}
+                    delay={0.4}
+                  >
+                    <ContentPanel>
                     <ServiceEyebrow>
                       SERVICE {String(index + 1).padStart(2, "0")}
                     </ServiceEyebrow>
@@ -235,17 +242,20 @@ const Services = () => {
                         </BenefitItem>
                       ))}
                     </BenefitsList>
-                  </ContentPanel>
-                </AnimatedSection>
+                    </ContentPanel>
+                  </AnimatedSection>
+                </ServiceContentSlot>
 
                 {/* IMAGE RIGHT */}
                 {isReverse && (
-                  <AnimatedSection animation="fadeInRight" delay={0.2}>
-                    <ImagePanel>
-                      <ServiceImage src={service.image} alt={service.title} />
-                      <ImageBadge>{service.title.toUpperCase()}</ImageBadge>
-                    </ImagePanel>
-                  </AnimatedSection>
+                  <ServiceImageSlot>
+                    <AnimatedSection animation="fadeInRight" delay={0.2}>
+                      <ImagePanel>
+                        <ServiceImage src={service.image} alt={service.title} />
+                        <ImageBadge>{service.title.toUpperCase()}</ImageBadge>
+                      </ImagePanel>
+                    </AnimatedSection>
+                  </ServiceImageSlot>
                 )}
               </ServiceGrid>
             </ServiceSection>
@@ -320,6 +330,30 @@ const Services = () => {
           </motion.div>
         </ComboSection>
 
+        {/* MOBILE STATS ABOVE CTA */}
+        <MobileStatsOnly>
+          <StatsStrip>
+            <StatBlock>
+              <StatNumber>50+</StatNumber>
+              <StatLabel>Vehicles Protected</StatLabel>
+            </StatBlock>
+
+            <StatDivider />
+
+            <StatBlock>
+              <StatNumber>3 Years</StatNumber>
+              <StatLabel>Industry Experience</StatLabel>
+            </StatBlock>
+
+            <StatDivider />
+
+            <StatBlock>
+              <StatNumber>100%</StatNumber>
+              <StatLabel>Satisfaction Guaranteed</StatLabel>
+            </StatBlock>
+          </StatsStrip>
+        </MobileStatsOnly>
+
         {/* CTA */}
         <AnimatedSection animation="fadeInUp">
           <CTABanner>
@@ -348,8 +382,6 @@ const Services = () => {
           </CTABanner>
         </AnimatedSection>
       </ServicesWrapper>
-
-      <Footer />
     </Sidebar>
   );
 };

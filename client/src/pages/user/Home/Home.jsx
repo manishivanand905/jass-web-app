@@ -4,7 +4,6 @@ import WhyChooseUs from "../../../components/user/WhyChooseUs/WhyChooseUs";
 import Howitworks from "../../../components/user/Howitworks/Howitworks";
 import MobileComparison from "../../../components/user/MobileComparison/MobileComparison";
 import Testimonials from "../../../components/user/Testimonials/Testimonials";
-import Footer from "../../../components/common/Footer/Footer";
 import Sidebar from "../../../components/common/Sidebar/Sidebar";
 
 const Home = () => {
@@ -16,7 +15,6 @@ const Home = () => {
       <Howitworks />
       <MobileComparison />
       <Testimonials />
-      <Footer />
     </Sidebar>
   );
 };

@@ -39,6 +39,7 @@ import {
   CTAButtons,
   PrimaryButton,
   SecondaryButton,
+  FooterFix,
 } from "./ContactStyles";
 
 const Contact = () => {
@@ -212,7 +213,9 @@ const Contact = () => {
           </CTAContent>
         </CTABanner>
       </ContactWrapper>
-      <Footer />
+      <FooterFix>
+        <Footer />
+      </FooterFix>
     </Sidebar>
   );
 };
