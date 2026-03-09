@@ -656,3 +656,103 @@ export const ClearButton = styled.button`
     max-width: 240px;
   }
 `;
+
+export const CTABanner = styled.section`
+  padding: 100px 60px;
+  background:
+    radial-gradient(circle at center, rgba(204, 0, 0, 0.1), transparent 70%),
+    #0a0a0a;
+  text-align: center;
+
+  @media (max-width: 768px) {
+    padding: 60px 30px;
+  }
+`;
+
+export const CTAContent = styled.div`
+  max-width: 800px;
+  margin: 0 auto;
+`;
+
+export const CTATitle = styled.h2`
+  font-family: "Barlow Condensed", Arial, sans-serif;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 900;
+  line-height: 1.1;
+  text-transform: uppercase;
+  color: #ffffff;
+  margin: 0 0 16px 0;
+
+  span {
+    color: #cc0000;
+  }
+`;
+
+export const CTASubtitle = styled.p`
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.1rem;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0 0 40px 0;
+`;
+
+export const CTAButtons = styled.div`
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+`;
+
+export const PrimaryButton = styled.button`
+  font-family: "Barlow Condensed", Arial, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 16px 32px;
+  background: #cc0000;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s;
+
+  &:hover {
+    background: #ff0000;
+    transform: translateY(-2px);
+  }
+
+  i {
+    font-size: 16px;
+  }
+`;
+
+export const SecondaryButton = styled.button`
+  font-family: "Barlow Condensed", Arial, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 16px 32px;
+  background: transparent;
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s;
+
+  &:hover {
+    border-color: #cc0000;
+    color: #cc0000;
+  }
+
+  i {
+    font-size: 16px;
+  }
+`;

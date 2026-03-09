@@ -35,6 +35,12 @@ import {
   EmptyTitle,
   EmptyText,
   ClearButton,
+  CTABanner,
+  CTAContent,
+  CTATitle,
+  CTASubtitle,
+  CTAButtons,
+  SecondaryButton,
 } from "./ProductsStyles";
 import ProductCard from "../../../components/user/ProductCard/ProductCard";
 
@@ -288,6 +294,26 @@ const Products = () => {
             </ClearButton>
           </EmptyState>
         )}
+
+        <CTABanner>
+          <CTAContent>
+            <CTATitle>
+              READY TO PROTECT <span>YOUR VEHICLE?</span>
+            </CTATitle>
+
+            <CTASubtitle>
+              Book your service today and experience premium automotive
+              protection
+            </CTASubtitle>
+
+            <CTAButtons>
+              <SecondaryButton onClick={() => navigate("/contact")}>
+                <i className="fa-solid fa-phone" />
+                CONTACT US
+              </SecondaryButton>
+            </CTAButtons>
+          </CTAContent>
+        </CTABanner>
       </ProductsWrapper>
     </Sidebar>
   );

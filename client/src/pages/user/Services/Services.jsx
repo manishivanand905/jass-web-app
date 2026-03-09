@@ -373,7 +373,7 @@ const Services = () => {
                   VIEW PRODUCTS
                 </PrimaryButton>
 
-                <SecondaryButton>
+                <SecondaryButton onClick={() => navigate('/contact')}>
                   <i className="fa-solid fa-phone" />
                   CONTACT US
                 </SecondaryButton>

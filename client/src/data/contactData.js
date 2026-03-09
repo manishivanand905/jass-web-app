@@ -1,12 +1,14 @@
 export const contactInfo = {
-  phone: "+91 98765 43210",
-  email: "hello@shieldpro.in",
-  whatsapp: "+91 98765 43210",
+  phone: "+91 9030764455",
+  email: "jassautomotives@gmail.com",
+  whatsapp: "+91 9030764455",
   address: {
-    line1: "Studio 12, Auto Nagar",
-    line2: "Hyderabad, Telangana 500070",
-    googleMapsUrl: "https://maps.google.com/?q=Auto+Nagar+Hyderabad",
-    embedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.6!2d78.4!3d17.4!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTfCsDI0JzAwLjAiTiA3OMKwMjQnMDAuMCJF!5e0!3m2!1sen!2sin!4v1234567890",
+    line1:
+      "Autonation India Pvt Ltd\nDoor No.15, 31-XV-82/1, Kaithalapur\nKPHB 15th Phase, Kukatpally",
+    line2: "Hyderabad, Telangana 500085",
+    googleMapsUrl: "https://maps.app.goo.gl/iSDzsY9UhzD5oxwy6",
+    embedUrl:
+      "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.6!2d78.4!3d17.4!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTfCsDI0JzAwLjAiTiA3OMKwMjQnMDAuMCJF!5e0!3m2!1sen!2sin!4v1234567890",
   },
   hours: [
     { day: "Monday - Friday", hours: "9:00 AM - 7:00 PM", open: true },
@@ -14,10 +16,21 @@ export const contactInfo = {
     { day: "Sunday", hours: "Closed", open: false },
   ],
   social: [
-    { platform: "Instagram", icon: "fa-brands fa-instagram", url: "#" },
-    { platform: "Facebook", icon: "fa-brands fa-facebook", url: "#" },
-    { platform: "YouTube", icon: "fa-brands fa-youtube", url: "#" },
-    { platform: "X", icon: "fa-brands fa-x-twitter", url: "#" },
+    {
+      platform: "Instagram",
+      icon: "fa-brands fa-instagram",
+      url: "https://www.instagram.com/jass_automotives/",
+    },
+    {
+      platform: "whatsapp",
+      icon: "fa-brands fa-whatsapp",
+      url: "https://api.whatsapp.com/send/?phone=919030764455&text&type=phone_number&app_absent=0",
+    },
+    {
+      platform: "Facebook",
+      icon: "fa-brands fa-facebook",
+      url: "https://www.facebook.com/",
+    },
   ],
 };
 
