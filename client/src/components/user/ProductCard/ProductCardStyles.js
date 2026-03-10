@@ -224,23 +224,35 @@ export const Price = styled.div`
   }
 `;
 
-export const ViewButton = styled.div`
+export const ViewButton = styled.button`
   font-family: "Barlow Condensed", Arial, sans-serif;
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 1px;
   color: #cc0000;
-  transition: all 0.3s;
+  background: none;
+  border: 1px solid rgba(204, 0, 0, 0.7);
+  border-radius: 4px;
+  padding: 8px 12px;
+  transition:
+    color 0.3s ease,
+    background 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.3s ease;
   text-align: right;
   flex-shrink: 0;
+  cursor: pointer;
 
   &:hover {
-    transform: translateX(5px);
+    transform: translateY(-1px);
+    background: rgba(204, 0, 0, 0.12);
+    border-color: #cc0000;
   }
 
   @media (max-width: 768px) {
     font-size: 10px;
     letter-spacing: 0.3px;
     font-weight: 700;
+    padding: 7px 10px;
   }
 `;

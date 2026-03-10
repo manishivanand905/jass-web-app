@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-toastify";
 import { API_BASE } from "../../../config/api";
+import { useCart } from "../../../context/CartContext";
 import {
   SectionWrapper,
   SectionHeader,
@@ -27,6 +29,7 @@ const CARD_DELAYS = ["0.1s", "0.2s", "0.3s", "0.4s"];
 
 const Collections = () => {
   const navigate = useNavigate();
+  const { addToCart } = useCart();
   const [collections, setCollections] = useState([]);
 
   useEffect(() => {
@@ -47,6 +50,16 @@ const Collections = () => {
 
   const handleViewDetails = (_id) => {
     navigate(`/products/${_id}`);
+  };
+
+  const handleAddToCart = (product) => {
+    addToCart({
+      id: product._id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+    });
+    toast.success("Added to cart!");
   };
 
   return (
@@ -84,11 +97,11 @@ const Collections = () => {
                 <ViewDetailsBtn
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleViewDetails(product._id);
+                    handleAddToCart(product);
                   }}
                 >
-                  <span className="view-details-text">View Details</span>
-                  <i className="fa-solid fa-arrow-right arrow-icon" />
+                  <span className="view-details-text">Add to cart</span>
+                  <i className="fa-solid fa-cart-plus arrow-icon" />
                 </ViewDetailsBtn>
               </CardFooter>
             </CardBody>

@@ -268,13 +268,15 @@ const Products = () => {
                 product={{
                   id: product._id,
                   name: product.name,
-                  price: `${product.price.toLocaleString()}`,
+                  price: product.price,
                   image: product.image,
                   rating: product.rating || 0,
                   ratingCount: product.ratingCount || 0,
                   badge: product.badge,
-                  tag: product.category,
+                  category: product.category,
                   description: product.shortDescription,
+                  brand: product.brand,
+                  specifications: product.specifications,
                 }}
                 viewMode={viewMode}
                 index={index}

@@ -237,24 +237,32 @@ export const ViewDetailsBtn = styled.button`
   display: flex;
   align-items: center;
   gap: 6px;
-  background: none;
-  border: none;
-  padding: 0;
+  background: rgba(204, 0, 0, 0.1);
+  border: 1px solid rgba(204, 0, 0, 0.75);
+  border-radius: 4px;
+  padding: 8px 12px;
   cursor: pointer;
   font-family: "Barlow Condensed", Arial, sans-serif;
   font-size: ${({ theme }) => theme.fontSize.xs};
   font-weight: ${({ theme }) => theme.fontWeight.bold};
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.4);
-  transition: color 0.25s ease;
+  color: #cc0000;
+  transition:
+    color 0.25s ease,
+    background 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.25s ease;
 
   &:hover {
-    color: #cc0000;
+    color: #ffffff;
+    background: #cc0000;
+    border-color: #cc0000;
+    transform: translateY(-1px);
   }
 
   .view-details-text {
-    opacity: 0.7;
+    opacity: 1;
     transition:
       opacity 0.25s ease,
       color 0.25s ease;
