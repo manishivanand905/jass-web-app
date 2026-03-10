@@ -296,11 +296,11 @@ export const BookButton = styled.button`
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: #cc0000;
-  border: none;
-  border-radius: 8px;
+  background: transparent;
+  border: 1px solid #cc0000;
+  min-height: 56px;
   padding: 16px 32px;
-  color: white;
+  color: #cc0000;
   font-family: "Barlow Condensed", Arial, sans-serif;
   font-size: 16px;
   font-weight: 900;
@@ -308,16 +308,33 @@ export const BookButton = styled.button`
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.3s;
-  clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 0 100%);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 10px) 0,
+    100% 10px,
+    100% 100%,
+    10px 100%,
+    0 calc(100% - 10px)
+  );
 
   &:hover {
-    background: #ff0000;
-    transform: translateY(-2px);
+    background: #cc0000;
+    color: #ffffff;
     box-shadow: 0 8px 20px rgba(204, 0, 0, 0.4);
   }
 
-  i {
-    font-size: 18px;
+  &:disabled {
+    border-color: rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.35);
+    background: transparent;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  @media (max-width: 640px) {
+    min-height: 48px;
+    padding: 14px 24px;
+    font-size: 14px;
   }
 `;
 

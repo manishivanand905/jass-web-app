@@ -66,7 +66,7 @@ const ProductDetail = () => {
         price: product.price,
         image: product.image,
       });
-      toast.success("Added to cart!");
+      toast.success("Adding to cart.");
     }
   };
 
@@ -78,9 +78,12 @@ const ProductDetail = () => {
           key={i}
           className="fa-solid fa-star"
           style={{
-            color: i <= Math.floor(rating || 0) ? "#cc0000" : "rgba(255,255,255,0.2)",
+            color:
+              i <= Math.floor(rating || 0)
+                ? "#cc0000"
+                : "rgba(255,255,255,0.2)",
           }}
-        />
+        />,
       );
     }
     return stars;
@@ -90,8 +93,17 @@ const ProductDetail = () => {
     return (
       <Sidebar type="user">
         <DetailWrapper>
-          <div style={{ padding: "100px 20px", textAlign: "center", color: "white" }}>
-            <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: "2rem" }}></i>
+          <div
+            style={{
+              padding: "100px 20px",
+              textAlign: "center",
+              color: "white",
+            }}
+          >
+            <i
+              className="fa-solid fa-spinner fa-spin"
+              style={{ fontSize: "2rem" }}
+            ></i>
           </div>
         </DetailWrapper>
         <Footer />
@@ -103,9 +115,17 @@ const ProductDetail = () => {
     return (
       <Sidebar type="user">
         <DetailWrapper>
-          <div style={{ padding: "100px 20px", textAlign: "center", color: "white" }}>
+          <div
+            style={{
+              padding: "100px 20px",
+              textAlign: "center",
+              color: "white",
+            }}
+          >
             <h2>Product not found</h2>
-            <button onClick={() => navigate("/products")}>Back to Products</button>
+            <button onClick={() => navigate("/products")}>
+              Back to Products
+            </button>
           </div>
         </DetailWrapper>
         <Footer />
@@ -129,7 +149,10 @@ const ProductDetail = () => {
                   $active={activeImage === index}
                   onClick={() => setActiveImage(index)}
                 >
-                  <img src={product.image} alt={`${product.name} ${index + 1}`} />
+                  <img
+                    src={product.image}
+                    alt={`${product.name} ${index + 1}`}
+                  />
                 </Thumbnail>
               ))}
             </ThumbnailStrip>
@@ -211,7 +234,9 @@ const ProductDetail = () => {
               </div>
             )}
 
-            <Description>{product.fullDescription || product.shortDescription}</Description>
+            <Description>
+              {product.fullDescription || product.shortDescription}
+            </Description>
 
             <Divider />
 
@@ -220,7 +245,14 @@ const ProductDetail = () => {
                 <SectionLabel>WARRANTY & DURABILITY</SectionLabel>
                 <div style={{ marginBottom: "24px" }}>
                   {product.durability && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        marginBottom: "12px",
+                      }}
+                    >
                       <i
                         className="fa-solid fa-clock"
                         style={{ color: "#cc0000", fontSize: "1.2rem" }}
@@ -246,13 +278,20 @@ const ProductDetail = () => {
                             color: "white",
                           }}
                         >
-                          {product.durability} {product.durability === 1 ? "Year" : "Years"}
+                          {product.durability}{" "}
+                          {product.durability === 1 ? "Year" : "Years"}
                         </div>
                       </div>
                     </div>
                   )}
                   {product.warranty && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                      }}
+                    >
                       <i
                         className="fa-solid fa-shield-halved"
                         style={{ color: "#cc0000", fontSize: "1.2rem" }}
@@ -319,8 +358,12 @@ const ProductDetail = () => {
             )}
 
             <ActionRow>
-              <BookButton onClick={handleAddToCart} disabled={!product.available}>
-                <i className="fa-solid fa-cart-plus" />
+              <BookButton
+                onClick={handleAddToCart}
+                disabled={!product.available}
+                aria-label={product.available ? "Add to cart" : "Out of stock"}
+                title={product.available ? "Add to cart" : "Out of stock"}
+              >
                 {product.available ? "ADD TO CART" : "OUT OF STOCK"}
               </BookButton>
               <BackButton onClick={() => navigate(-1)}>

@@ -31,7 +31,7 @@ const ProductCard = ({ product, viewMode, index, onClick }) => {
             color:
               i <= Math.floor(rating) ? "#cc0000" : "rgba(255,255,255,0.2)",
           }}
-        />
+        />,
       );
     }
     return stars;
@@ -45,7 +45,7 @@ const ProductCard = ({ product, viewMode, index, onClick }) => {
       price: Number(product.price),
       image: product.image,
     });
-    toast.success("Added to cart!");
+    toast.success("Adding to cart.");
   };
 
   return (
@@ -91,10 +91,15 @@ const ProductCard = ({ product, viewMode, index, onClick }) => {
         )}
         <CardFooter>
           <Price $viewMode={viewMode}>
-            {`₹${Number(product.price || 0).toLocaleString()}`}
+            {`\u20B9${Number(product.price || 0).toLocaleString()}`}
           </Price>
-          <ViewButton $viewMode={viewMode} onClick={handleAddToCart}>
-            ADD TO CART
+          <ViewButton
+            $viewMode={viewMode}
+            onClick={handleAddToCart}
+            aria-label="Add to cart"
+            title="Add to cart"
+          >
+            <i className="fa-solid fa-cart-plus arrow-icon" />
           </ViewButton>
         </CardFooter>
       </CardContent>

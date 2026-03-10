@@ -236,41 +236,50 @@ export const CardPrice = styled.span`
 export const ViewDetailsBtn = styled.button`
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: rgba(204, 0, 0, 0.1);
-  border: 1px solid rgba(204, 0, 0, 0.75);
-  border-radius: 4px;
-  padding: 8px 12px;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid #cc0000;
+  width: 36px;
+  height: 36px;
   cursor: pointer;
-  font-family: "Barlow Condensed", Arial, sans-serif;
-  font-size: ${({ theme }) => theme.fontSize.xs};
-  font-weight: ${({ theme }) => theme.fontWeight.bold};
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
   color: #cc0000;
   transition:
     color 0.25s ease,
     background 0.25s ease,
-    border-color 0.25s ease,
+    box-shadow 0.25s ease,
     transform 0.25s ease;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 7px) 0,
+    100% 7px,
+    100% 100%,
+    7px 100%,
+    0 calc(100% - 7px)
+  );
 
   &:hover {
     color: #ffffff;
     background: #cc0000;
-    border-color: #cc0000;
-    transform: translateY(-1px);
-  }
+    box-shadow: 0 4px 16px rgba(204, 0, 0, 0.4);
 
-  .view-details-text {
-    opacity: 1;
-    transition:
-      opacity 0.25s ease,
-      color 0.25s ease;
+    .arrow-icon {
+      color: #ffffff;
+    }
   }
 
   .arrow-icon {
-    font-size: 0.8em;
+    font-size: 11px;
+    color: #cc0000;
     transition: color 0.25s ease;
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    width: 32px;
+    height: 32px;
   }
 `;
 

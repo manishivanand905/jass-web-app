@@ -225,34 +225,52 @@ export const Price = styled.div`
 `;
 
 export const ViewButton = styled.button`
-  font-family: "Barlow Condensed", Arial, sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #cc0000;
-  background: none;
-  border: 1px solid rgba(204, 0, 0, 0.7);
-  border-radius: 4px;
-  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid #cc0000;
+  width: 36px;
+  height: 36px;
   transition:
     color 0.3s ease,
     background 0.3s ease,
-    border-color 0.3s ease,
+    box-shadow 0.3s ease,
     transform 0.3s ease;
-  text-align: right;
   flex-shrink: 0;
   cursor: pointer;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 7px) 0,
+    100% 7px,
+    100% 100%,
+    7px 100%,
+    0 calc(100% - 7px)
+  );
 
   &:hover {
-    transform: translateY(-1px);
-    background: rgba(204, 0, 0, 0.12);
-    border-color: #cc0000;
+    background: #cc0000;
+    color: #ffffff;
+    box-shadow: 0 4px 16px rgba(204, 0, 0, 0.4);
+
+    i {
+      color: #ffffff;
+    }
+  }
+
+  i {
+    font-size: 11px;
+    color: #cc0000;
+    transition: color 0.25s ease;
+  }
+
+  &:active {
+    transform: scale(0.97);
   }
 
   @media (max-width: 768px) {
-    font-size: 10px;
-    letter-spacing: 0.3px;
-    font-weight: 700;
-    padding: 7px 10px;
+    width: 32px;
+    height: 32px;
   }
 `;

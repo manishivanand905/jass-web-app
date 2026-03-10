@@ -24,7 +24,6 @@ import {
   ViewAllButton,
 } from "./CollectionsStyles";
 
-// Animation delays for staggered card entrance
 const CARD_DELAYS = ["0.1s", "0.2s", "0.3s", "0.4s"];
 
 const Collections = () => {
@@ -38,7 +37,7 @@ const Collections = () => {
         const { data } = await axios.get(`${API_BASE}/products?limit=4`);
         setCollections(data.products || []);
       } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error("Error fetching products:", error);
       }
     };
     fetchProducts();
@@ -59,12 +58,11 @@ const Collections = () => {
       price: product.price,
       image: product.image,
     });
-    toast.success("Added to cart!");
+    toast.success("Adding to cart.");
   };
 
   return (
     <SectionWrapper>
-      {/* Header */}
       <SectionHeader>
         <SectionEyebrow>Our Collection</SectionEyebrow>
         <SectionTitle>
@@ -72,7 +70,6 @@ const Collections = () => {
         </SectionTitle>
       </SectionHeader>
 
-      {/* 4-column product grid */}
       <ProductsGrid>
         {collections.map((product, index) => (
           <ProductCard
@@ -80,27 +77,28 @@ const Collections = () => {
             $delay={CARD_DELAYS[index]}
             onClick={() => handleViewDetails(product._id)}
           >
-            {/* Image */}
             <CardImageWrapper>
               <img src={product.image} alt={product.name} loading="lazy" />
               {product.badge && <BadgePill>{product.badge}</BadgePill>}
             </CardImageWrapper>
 
-            {/* Body */}
             <CardBody>
               <CardCategory>{product.category}</CardCategory>
               <CardName>{product.name}</CardName>
               <CardDescription>{product.description}</CardDescription>
 
               <CardFooter>
-                <CardPrice>₹{product.price}</CardPrice>
+                <CardPrice>
+                  {`\u20B9${Number(product.price || 0).toLocaleString()}`}
+                </CardPrice>
                 <ViewDetailsBtn
-                  onClick={(e) => {
-                    e.stopPropagation();
+                  onClick={(event) => {
+                    event.stopPropagation();
                     handleAddToCart(product);
                   }}
+                  aria-label="Add to cart"
+                  title="Add to cart"
                 >
-                  <span className="view-details-text">Add to cart</span>
                   <i className="fa-solid fa-cart-plus arrow-icon" />
                 </ViewDetailsBtn>
               </CardFooter>
@@ -109,7 +107,6 @@ const Collections = () => {
         ))}
       </ProductsGrid>
 
-      {/* View All CTA */}
       <ViewAllWrapper>
         <ViewAllButton onClick={handleViewAll}>
           <span>View All Products</span>
