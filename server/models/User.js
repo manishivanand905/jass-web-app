@@ -32,6 +32,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  passwordResetOtp: {
+    type: String,
+    select: false
+  },
+  passwordResetOtpExpires: {
+    type: Date,
+    select: false
+  },
   addresses: [{
     fullName: String,
     phone: String,

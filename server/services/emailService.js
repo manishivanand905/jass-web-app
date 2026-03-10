@@ -90,6 +90,28 @@ const sendLoginEmail = async (user) => {
   );
 };
 
+const sendPasswordResetOtpEmail = async (user, otp) => {
+  const content = `
+    <h2>Password Reset OTP</h2>
+    <p>Hi <strong>${user.name}</strong>,</p>
+    <p>Use the OTP below to reset your Jass Automotives account password.</p>
+    <div class="info-box" style="text-align: center;">
+      <div class="info-row">
+        <span class="label" style="display: block; margin-bottom: 8px;">Your OTP</span>
+        <span class="value" style="font-size: 32px; letter-spacing: 8px; font-weight: bold; color: #C90000;">${otp}</span>
+      </div>
+      <div class="info-row"><span class="label">Valid for:</span> <span class="value">10 minutes</span></div>
+    </div>
+    <p>If you did not request this, you can ignore this email. Your password will remain unchanged.</p>
+    <p>Best regards,<br><strong>Jass Automotives Team</strong></p>
+  `;
+  await sendEmail(
+    user.email,
+    "Password Reset OTP - Jass Automotives",
+    emailTemplate(content),
+  );
+};
+
 const sendBookingConfirmationEmail = async (booking, user, serviceImage = 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=200&fit=crop') => {
   console.log('Booking isCombo flag:', booking.isCombo);
   
@@ -267,6 +289,7 @@ const sendOrderStatusUpdateEmail = async (order, user) => {
 module.exports = {
   sendRegistrationEmail,
   sendLoginEmail,
+  sendPasswordResetOtpEmail,
   sendBookingConfirmationEmail,
   sendBookingStatusUpdateEmail,
   sendOrderConfirmationEmail,

@@ -27,6 +27,45 @@ export const userAPI = {
     }
   },
 
+  requestPasswordResetOtp: async (data) => {
+    try {
+      const response = await fetch(`${API_BASE}/auth/forgot-password/request-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      return response.json();
+    } catch (error) {
+      return { success: false, message: error.message };
+    }
+  },
+
+  verifyPasswordResetOtp: async (data) => {
+    try {
+      const response = await fetch(`${API_BASE}/auth/forgot-password/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      return response.json();
+    } catch (error) {
+      return { success: false, message: error.message };
+    }
+  },
+
+  resetPasswordWithOtp: async (data) => {
+    try {
+      const response = await fetch(`${API_BASE}/auth/forgot-password/reset`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      return response.json();
+    } catch (error) {
+      return { success: false, message: error.message };
+    }
+  },
+
   createBooking: async (data) => {
     try {
       const response = await fetch(`${API_BASE}/bookings`, {
