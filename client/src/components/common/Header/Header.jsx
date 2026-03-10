@@ -35,8 +35,8 @@ const Header = () => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   useEffect(() => {
@@ -48,12 +48,14 @@ const Header = () => {
       }
 
       try {
-        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-        const { data } = await axios.get(`${apiUrl}/api/search?q=${encodeURIComponent(searchQuery)}`);
+        const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
+        const { data } = await axios.get(
+          `${apiUrl}/api/search?q=${encodeURIComponent(searchQuery)}`,
+        );
         setSearchResults(data.results);
         setShowResults(true);
       } catch (error) {
-        console.error('Search failed:', error);
+        console.error("Search failed:", error);
         setSearchResults([]);
       }
     };
@@ -123,50 +125,67 @@ const Header = () => {
               />
             </SearchBar>
             {showResults && searchResults.length > 0 && (
-              <div style={{
-                position: 'absolute',
-                top: '100%',
-                left: 0,
-                right: 0,
-                background: '#1a1a1a',
-                border: '1px solid #403D40',
-                borderRadius: '8px',
-                marginTop: '4px',
-                zIndex: 1000,
-                maxHeight: '300px',
-                overflowY: 'auto'
-              }}>
+              <div
+                style={{
+                  position: "absolute",
+                  top: "100%",
+                  left: 0,
+                  right: 0,
+                  background: "#1a1a1a",
+                  border: "1px solid #403D40",
+                  borderRadius: "8px",
+                  marginTop: "4px",
+                  zIndex: 1000,
+                  maxHeight: "300px",
+                  overflowY: "auto",
+                }}
+              >
                 {searchResults.map((result) => (
                   <div
                     key={result.id}
                     onClick={() => handleResultClick(result)}
                     style={{
-                      padding: '12px 16px',
-                      borderBottom: '1px solid rgba(255,255,255,0.1)',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      transition: 'background 0.2s ease'
+                      padding: "12px 16px",
+                      borderBottom: "1px solid rgba(255,255,255,0.1)",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                      transition: "background 0.2s ease",
                     }}
-                    onMouseEnter={(e) => e.target.style.background = 'rgba(255,255,255,0.05)'}
-                    onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                    onMouseEnter={(e) =>
+                      (e.target.style.background = "rgba(255,255,255,0.05)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.target.style.background = "transparent")
+                    }
                   >
                     <img
                       src={result.image}
                       alt={result.title}
                       style={{
-                        width: '40px',
-                        height: '40px',
-                        objectFit: 'cover',
-                        borderRadius: '4px'
+                        width: "40px",
+                        height: "40px",
+                        objectFit: "cover",
+                        borderRadius: "4px",
                       }}
                     />
                     <div style={{ flex: 1 }}>
-                      <div style={{ color: '#ECECEC', fontSize: '0.9rem', fontWeight: '600' }}>
+                      <div
+                        style={{
+                          color: "#ECECEC",
+                          fontSize: "0.9rem",
+                          fontWeight: "600",
+                        }}
+                      >
                         {result.title}
                       </div>
-                      <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem' }}>
+                      <div
+                        style={{
+                          color: "rgba(255,255,255,0.6)",
+                          fontSize: "0.8rem",
+                        }}
+                      >
                         {result.category} • {result.type}
                         {result.price && ` • ₹${result.price}`}
                       </div>
@@ -183,22 +202,38 @@ const Header = () => {
           <NotificationDropdown />
 
           <QuickBookBtn
-            onClick={() => navigate('/cart')}
+            onClick={() => navigate("/cart")}
             aria-label="View cart"
             title="View cart"
-            style={{ position: 'relative' }}
+            style={{ position: "relative" }}
           >
             <i className="fa-solid fa-shopping-cart" />
-            {cartCount > 0 && <span style={{ position: 'absolute', top: '-5px', right: '-5px', background: '#cc0000', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem' }}>{cartCount}</span>}
+            {cartCount > 0 && (
+              <span
+                style={{
+                  color: "#ffffff",
+                  position: "absolute",
+                  top: "-5px",
+                  right: "-5px",
+                  background: "#cc0000",
+                  borderRadius: "50%",
+                  width: "20px",
+                  height: "20px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "0.7rem",
+                }}
+              >
+                {cartCount}
+              </span>
+            )}
           </QuickBookBtn>
 
           <NavDivider />
 
           {/* Auth */}
-          <AuthButton
-            onClick={handleAuth}
-            title={user ? "Logout" : "Login"}
-          >
+          <AuthButton onClick={handleAuth} title={user ? "Logout" : "Login"}>
             <i
               className={`fa-solid fa-${
                 user ? "right-from-bracket" : "right-to-bracket"
