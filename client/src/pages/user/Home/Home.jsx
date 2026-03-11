@@ -11,8 +11,8 @@ const Home = () => {
     <Sidebar type="user">
       <Hero />
       <Collections />
-      <WhyChooseUs />
       <Howitworks />
+      <WhyChooseUs />
       <MobileComparison />
       <Testimonials />
     </Sidebar>

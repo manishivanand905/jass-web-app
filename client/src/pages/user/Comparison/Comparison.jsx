@@ -35,13 +35,6 @@ import {
   FeatureCell,
   BestForBadge,
   SectionDivider,
-
-  // Ceramic UI only
-  CeramicVisualiserSection,
-  CeramicHeader,
-  CeramicTitle,
-  CeramicBadge,
-  VisualHeader,
   CTABanner,
   CTAContent,
   CTATitle,
@@ -139,34 +132,7 @@ const Comparison = () => {
           </TabButton>
         </TabSwitcher>
 
-        {/* CERAMIC VISUALISER ONLY */}
-
-        {activeTab === "ceramic" && (
-          <CeramicVisualiserSection data-reveal>
-            <CeramicHeader>
-              <VisualHeader>
-                <Eyebrow>Ceramic Coating Visualiser</Eyebrow>
-
-                <CeramicTitle>
-                  See the <span>brightness enhancement</span>
-                </CeramicTitle>
-
-                <HeroSubtitle>
-                  Enhance your vehicle's natural beauty with professional
-                  ceramic coatings. Ceramic coating dramatically improves paint
-                  brightness, gloss and depth while creating a mirror-like
-                  showroom finish.
-                </HeroSubtitle>
-              </VisualHeader>
-
-              <CeramicBadge>
-                <i className="fa-solid fa-sparkles" />
-
-                <span>Brightness Enhancement</span>
-              </CeramicBadge>
-            </CeramicHeader>
-          </CeramicVisualiserSection>
-        )}
+        
 
         {/* SECTION DIVIDER */}
 
