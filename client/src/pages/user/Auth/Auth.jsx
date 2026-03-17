@@ -559,18 +559,6 @@ const UserAuth = () => {
                         )}
                       </Button>
 
-                      <Divider2><span>Or continue with</span></Divider2>
-
-                      <SocialButtons>
-                        <SocialButton type="button">
-                          <i className="fa-brands fa-google" />
-                          Google
-                        </SocialButton>
-                        <SocialButton type="button">
-                          <i className="fa-brands fa-facebook" />
-                          Facebook
-                        </SocialButton>
-                      </SocialButtons>
                     </>
                   ) : (
                     <>
