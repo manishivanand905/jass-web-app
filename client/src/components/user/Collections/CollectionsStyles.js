@@ -239,9 +239,10 @@ export const ViewDetailsBtn = styled.button`
   justify-content: center;
   background: transparent;
   border: 1px solid #cc0000;
-  width: 36px;
-  height: 36px;
+  width: 110px;
+  height: 33px;
   cursor: pointer;
+  font-size: ${({ theme }) => theme.fontSize.xs};
   color: #cc0000;
   transition:
     color 0.25s ease,
@@ -268,9 +269,10 @@ export const ViewDetailsBtn = styled.button`
   }
 
   .arrow-icon {
-    font-size: 11px;
+    font-size: 10px;
     color: #cc0000;
     transition: color 0.25s ease;
+    margin-left: 6px;
   }
 
   &:active {
@@ -278,7 +280,7 @@ export const ViewDetailsBtn = styled.button`
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    width: 32px;
+    width: 128px;
     height: 32px;
   }
 `;

@@ -36,25 +36,39 @@ const Sidebar = ({ type = "user", children }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showMobileProfileMenu, setShowMobileProfileMenu] = useState(false);
+  const [showHint, setShowHint] = useState(false); // 🔥 NEW
+
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logoutUser } = useAuth();
 
   const menuItems = userMenuItems;
 
+  // ✅ SHOW HINT AFTER 20s (DESKTOP ONLY)
+  useEffect(() => {
+    if (window.innerWidth <= 1024) return;
+
+    const timer = setTimeout(() => {
+      setShowHint(true);
+    }, 20000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // ✅ CLOSE MOBILE PROFILE MENU
   useEffect(() => {
     const handleClickOutside = () => {
       if (showMobileProfileMenu) {
         setShowMobileProfileMenu(false);
       }
     };
-    
+
     if (showMobileProfileMenu) {
-      document.addEventListener('click', handleClickOutside);
+      document.addEventListener("click", handleClickOutside);
     }
-    
+
     return () => {
-      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener("click", handleClickOutside);
     };
   }, [showMobileProfileMenu]);
 
@@ -64,11 +78,13 @@ const Sidebar = ({ type = "user", children }) => {
     setShowMobileProfileMenu(false);
   };
 
+  // ✅ FIXED SIDEBAR CLICK
   const handleSidebarClick = (e) => {
-    if (e.target.closest('.profile-card')) {
-      return;
-    }
+    if (e.target.closest(".profile-card")) return;
+
+    setIsOpen((prev) => !prev);
     setShowProfileMenu(false);
+    setShowHint(false); // hide hint when used
   };
 
   const handleLogout = () => {
@@ -87,7 +103,9 @@ const Sidebar = ({ type = "user", children }) => {
   return (
     <>
       <Header />
-      <SidebarContainer $isOpen={isOpen} onClick={(e) => { setIsOpen(!isOpen); handleSidebarClick(e); }}>
+
+      {/* SIDEBAR */}
+      <SidebarContainer $isOpen={isOpen} onClick={handleSidebarClick}>
         <NavList>
           {menuItems.map((item) => (
             <NavItem key={item.path}>
@@ -103,6 +121,7 @@ const Sidebar = ({ type = "user", children }) => {
           ))}
         </NavList>
 
+        {/* PROFILE */}
         <ProfileSection $isOpen={isOpen}>
           {user ? (
             <>
@@ -111,20 +130,40 @@ const Sidebar = ({ type = "user", children }) => {
                 $isOpen={isOpen}
                 onClick={(e) => {
                   e.stopPropagation();
-                  setShowProfileMenu(!showProfileMenu);
+
+                  // 🔥 FIX: open sidebar first
+                  if (!isOpen) {
+                    setIsOpen(true);
+                    setShowHint(false);
+                    return;
+                  }
+
+                  setShowProfileMenu((prev) => !prev);
                 }}
               >
                 <ProfileAvatar>
                   <i className="fa-solid fa-user" />
                 </ProfileAvatar>
+
                 <ProfileInfo $isOpen={isOpen}>
                   <ProfileName>{user.name}</ProfileName>
                   <ProfileEmail>{user.email}</ProfileEmail>
                 </ProfileInfo>
+
                 {isOpen && (
-                  <i className={`fa-solid fa-chevron-${showProfileMenu ? 'up' : 'down'}`} style={{ marginLeft: 'auto', fontSize: '12px', color: 'rgba(255,255,255,0.5)' }} />
+                  <i
+                    className={`fa-solid fa-chevron-${
+                      showProfileMenu ? "up" : "down"
+                    }`}
+                    style={{
+                      marginLeft: "auto",
+                      fontSize: "12px",
+                      color: "rgba(255,255,255,0.5)",
+                    }}
+                  />
                 )}
               </ProfileCard>
+
               {showProfileMenu && isOpen && (
                 <ProfileMenu>
                   <ProfileMenuItem onClick={() => handleNavigation("/profile")}>
@@ -150,7 +189,39 @@ const Sidebar = ({ type = "user", children }) => {
           )}
         </ProfileSection>
       </SidebarContainer>
-      
+
+      {/* 🔥 HINT ARROW (DESKTOP ONLY) */}
+      {showHint && !isOpen && window.innerWidth > 1024 && (
+        <div
+          onClick={() => {
+            setIsOpen(true);
+            setShowHint(false);
+          }}
+          style={{
+            position: "fixed",
+            top: "90px",
+            left: "75px",
+            zIndex: 1200,
+            background: "rgba(204,0,0,0.9)",
+            color: "#fff",
+            padding: "10px 14px",
+            borderRadius: "8px",
+            fontSize: "12px",
+            fontFamily: "Barlow Condensed",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
+            animation: "fadeInUp 0.4s ease",
+          }}
+        >
+          <i className="fa-solid fa-arrow-left" />
+          Open Menu
+        </div>
+      )}
+
+      {/* MOBILE NAV (UNCHANGED) */}
       <MobileBottomNav>
         {mobileMenuItems.slice(0, 3).map((item) => (
           <MobileNavItem
@@ -162,7 +233,7 @@ const Sidebar = ({ type = "user", children }) => {
             <span>{item.label}</span>
           </MobileNavItem>
         ))}
-        
+
         <MobileNavItem
           className={showMobileProfileMenu ? "active" : ""}
           onClick={(e) => {
@@ -181,17 +252,19 @@ const Sidebar = ({ type = "user", children }) => {
             <MobileProfileName>{user.name}</MobileProfileName>
             <MobileProfileEmail>{user.email}</MobileProfileEmail>
           </MobileProfileHeader>
+
           <ProfileMenuItem onClick={() => handleNavigation("/profile")}>
             <i className="fa-solid fa-user-circle" />
             <span>My Profile</span>
           </ProfileMenuItem>
+
           <ProfileMenuItem onClick={handleLogout}>
             <i className="fa-solid fa-right-from-bracket" />
             <span>Logout</span>
           </ProfileMenuItem>
         </MobileProfileMenu>
       )}
-      
+
       <PageWrapper $isOpen={isOpen}>{children}</PageWrapper>
     </>
   );

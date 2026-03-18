@@ -5,9 +5,9 @@ import { staggerContainer, staggerItem } from "../../../animations/variants";
 import { useScrollAnimation } from "../../../hooks/useScrollAnimation";
 import { useBookingModal } from "../../../hooks/useNewBookingModal";
 import { API_BASE } from "../../../config/api";
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 import {
   ServicesWrapper,
@@ -18,8 +18,6 @@ import {
   HeroTitle,
   HeroSubtitle,
   StatsStrip,
-  DesktopStatsOnly,
-  MobileStatsOnly,
   StatBlock,
   StatNumber,
   StatLabel,
@@ -83,13 +81,13 @@ const Services = () => {
   const fetchServices = async () => {
     try {
       const { data } = await axios.get(`${API_BASE}/services`);
-      const normalServices = data.filter(s => s.category !== 'combo');
-      const comboServices = data.filter(s => s.category === 'combo');
-      const allCombos = comboServices.flatMap(s => s.combos || []);
+      const normalServices = data.filter((s) => s.category !== "combo");
+      const comboServices = data.filter((s) => s.category === "combo");
+      const allCombos = comboServices.flatMap((s) => s.combos || []);
       setServices(normalServices);
       setCombos(allCombos);
     } catch (error) {
-      console.error('Failed to fetch services');
+      console.error("Failed to fetch services");
     } finally {
       setLoading(false);
     }
@@ -99,8 +97,17 @@ const Services = () => {
     return (
       <Sidebar type="user">
         <ServicesWrapper>
-          <div style={{ textAlign: 'center', padding: '100px 20px', color: 'rgba(236, 236, 236, 0.4)' }}>
-            <i className="fas fa-spinner fa-spin" style={{ fontSize: '3rem' }}></i>
+          <div
+            style={{
+              textAlign: "center",
+              padding: "100px 20px",
+              color: "rgba(236, 236, 236, 0.4)",
+            }}
+          >
+            <i
+              className="fas fa-spinner fa-spin"
+              style={{ fontSize: "3rem" }}
+            ></i>
           </div>
         </ServicesWrapper>
       </Sidebar>
@@ -127,140 +134,134 @@ const Services = () => {
           </HeroSection>
         </AnimatedSection>
 
-        {/* STATS STRIP */}
-        <DesktopStatsOnly>
-          <motion.div
-            ref={statsRef}
-            initial="hidden"
-            animate={statsControls}
-            variants={staggerContainer}
-          >
-            <StatsStrip>
-              <motion.div variants={staggerItem}>
-                <StatBlock>
-                  <StatNumber>50+</StatNumber>
-                  <StatLabel>Vehicles Protected</StatLabel>
-                </StatBlock>
-              </motion.div>
-
-              <StatDivider />
-
-              <motion.div variants={staggerItem}>
-                <StatBlock>
-                  <StatNumber>3 Years</StatNumber>
-                  <StatLabel>Industry Experience</StatLabel>
-                </StatBlock>
-              </motion.div>
-
-              <StatDivider />
-
-              <motion.div variants={staggerItem}>
-                <StatBlock>
-                  <StatNumber>100%</StatNumber>
-                  <StatLabel>Satisfaction Guaranteed</StatLabel>
-                </StatBlock>
-              </motion.div>
-            </StatsStrip>
-          </motion.div>
-        </DesktopStatsOnly>
-
         {/* DYNAMIC SERVICES */}
-        {services.length > 0 ? services.map((service, index) => {
-          const isReverse = index % 2 !== 0;
-          const titleParts = service.title.split(" ");
+        {services.length > 0 ? (
+          services.map((service, index) => {
+            const isReverse = index % 2 !== 0;
+            const titleParts = service.title.split(" ");
 
-          return (
-            <ServiceSection key={service._id} $reverse={isReverse}>
-              <ServiceGrid $reverse={isReverse}>
-                {/* IMAGE LEFT */}
-                {!isReverse && (
-                  <ServiceImageSlot>
-                    <AnimatedSection animation="fadeInLeft" delay={0.2}>
-                      <ImagePanel>
-                        <ServiceImage src={service.image} alt={service.title} />
-                        <ImageBadge>{service.title.toUpperCase()}</ImageBadge>
-                      </ImagePanel>
+            return (
+              <ServiceSection key={service._id} $reverse={isReverse}>
+                <ServiceGrid $reverse={isReverse}>
+                  {/* IMAGE LEFT */}
+                  {!isReverse && (
+                    <ServiceImageSlot>
+                      <AnimatedSection animation="fadeInLeft" delay={0.2}>
+                        <ImagePanel>
+                          <ServiceImage
+                            src={service.image}
+                            alt={service.title}
+                          />
+                          <ImageBadge>{service.title.toUpperCase()}</ImageBadge>
+                        </ImagePanel>
+                      </AnimatedSection>
+                    </ServiceImageSlot>
+                  )}
+
+                  {/* CONTENT */}
+                  <ServiceContentSlot>
+                    <AnimatedSection
+                      animation={isReverse ? "fadeInLeft" : "fadeInRight"}
+                      delay={0.4}
+                    >
+                      <ContentPanel>
+                        <ServiceEyebrow>
+                          SERVICE {String(index + 1).padStart(2, "0")}
+                        </ServiceEyebrow>
+
+                        <ServiceTitle>
+                          {titleParts[0]}{" "}
+                          <span>{titleParts.slice(1).join(" ")}</span>
+                        </ServiceTitle>
+
+                        <ServiceDescription>
+                          {service.description}
+                        </ServiceDescription>
+
+                        <TiersRow>
+                          {service.tiers?.map((tier) => (
+                            <TierCard
+                              key={tier._id}
+                              onClick={() =>
+                                openModal({
+                                  category: service.category,
+                                  serviceName: service.title,
+                                  tier: tier.tier,
+                                  tierName: tier.name,
+                                  price: tier.price,
+                                })
+                              }
+                            >
+                              <TierIcon>
+                                <i className={tier.icon} />
+                              </TierIcon>
+
+                              <TierName>{tier.name}</TierName>
+
+                              <TierCoverage>{tier.coverage}</TierCoverage>
+
+                              <TierPrice>
+                                ₹{tier.price.toLocaleString()}
+                              </TierPrice>
+
+                              <TierButton
+                                onClick={() =>
+                                  openModal({
+                                    category: service.category,
+                                    serviceName: service.title,
+                                    tier: tier.tier,
+                                    tierName: tier.name,
+                                    price: tier.price,
+                                  })
+                                }
+                              >
+                                Book Now →
+                              </TierButton>
+                            </TierCard>
+                          ))}
+                        </TiersRow>
+
+                        <BenefitsList>
+                          {service.benefits?.map((benefit, i) => (
+                            <BenefitItem key={i}>
+                              <i className="fa-solid fa-check" />
+                              {benefit}
+                            </BenefitItem>
+                          ))}
+                        </BenefitsList>
+                      </ContentPanel>
                     </AnimatedSection>
-                  </ServiceImageSlot>
-                )}
+                  </ServiceContentSlot>
 
-                {/* CONTENT */}
-                <ServiceContentSlot>
-                  <AnimatedSection
-                    animation={isReverse ? "fadeInLeft" : "fadeInRight"}
-                    delay={0.4}
-                  >
-                    <ContentPanel>
-                    <ServiceEyebrow>
-                      SERVICE {String(index + 1).padStart(2, "0")}
-                    </ServiceEyebrow>
-
-                    <ServiceTitle>
-                      {titleParts[0]}{" "}
-                      <span>{titleParts.slice(1).join(" ")}</span>
-                    </ServiceTitle>
-
-                    <ServiceDescription>
-                      {service.description}
-                    </ServiceDescription>
-
-                    <TiersRow>
-                      {service.tiers?.map((tier) => (
-                        <TierCard key={tier._id}>
-                          <TierIcon>
-                            <i className={tier.icon} />
-                          </TierIcon>
-
-                          <TierName>{tier.name}</TierName>
-
-                          <TierCoverage>{tier.coverage}</TierCoverage>
-
-                          <TierPrice>₹{tier.price.toLocaleString()}</TierPrice>
-
-                          <TierButton
-                            onClick={() =>
-                              openModal({
-                                category: service.category,
-                                serviceName: service.title,
-                                tier: tier.tier,
-                                tierName: tier.name,
-                                price: tier.price
-                              })
-                            }
-                          >
-                            Book Now →
-                          </TierButton>
-                        </TierCard>
-                      ))}
-                    </TiersRow>
-
-                    <BenefitsList>
-                      {service.benefits?.map((benefit, i) => (
-                        <BenefitItem key={i}>
-                          <i className="fa-solid fa-check" />
-                          {benefit}
-                        </BenefitItem>
-                      ))}
-                    </BenefitsList>
-                    </ContentPanel>
-                  </AnimatedSection>
-                </ServiceContentSlot>
-
-                {/* IMAGE RIGHT */}
-                {isReverse && (
-                  <ServiceImageSlot>
-                    <AnimatedSection animation="fadeInRight" delay={0.2}>
-                      <ImagePanel>
-                        <ServiceImage src={service.image} alt={service.title} />
-                        <ImageBadge>{service.title.toUpperCase()}</ImageBadge>
-                      </ImagePanel>
-                    </AnimatedSection>
-                  </ServiceImageSlot>
-                )}
-              </ServiceGrid>
-            </ServiceSection>
-          );
-        }) : <div style={{ textAlign: 'center', padding: '50px 20px', color: 'rgba(236, 236, 236, 0.4)' }}>No services available</div>}
+                  {/* IMAGE RIGHT */}
+                  {isReverse && (
+                    <ServiceImageSlot>
+                      <AnimatedSection animation="fadeInRight" delay={0.2}>
+                        <ImagePanel>
+                          <ServiceImage
+                            src={service.image}
+                            alt={service.title}
+                          />
+                          <ImageBadge>{service.title.toUpperCase()}</ImageBadge>
+                        </ImagePanel>
+                      </AnimatedSection>
+                    </ServiceImageSlot>
+                  )}
+                </ServiceGrid>
+              </ServiceSection>
+            );
+          })
+        ) : (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "50px 20px",
+              color: "rgba(236, 236, 236, 0.4)",
+            }}
+          >
+            No services available
+          </div>
+        )}
 
         {/* COMBO SECTION */}
         <ComboSection>
@@ -280,79 +281,107 @@ const Services = () => {
             variants={staggerContainer}
           >
             <ComboGrid>
-              {combos.length > 0 ? combos.map((combo) => (
-                <motion.div key={combo._id} variants={staggerItem}>
-                  <ComboCard $popular={combo.popular}>
-                    {combo.popular && <PopularBadge>MOST POPULAR</PopularBadge>}
-
-                    <ComboTopBar />
-
-                    <ComboIconCircle>
-                      <i className={combo.icon} />
-                    </ComboIconCircle>
-
-                    <ComboName>{combo.name}</ComboName>
-
-                    <ComboIncludes>
-                      {combo.includes?.map((item, i) => (
-                        <li key={i}>
-                          <i className="fa-solid fa-check" />
-                          {item}
-                        </li>
-                      ))}
-                    </ComboIncludes>
-
-                    <ComboPricing>
-                      {combo.originalPrice && (
-                        <OldPrice>
-                          ₹{combo.originalPrice.toLocaleString()}
-                        </OldPrice>
+              {combos.length > 0 ? (
+                combos.map((combo) => (
+                  <motion.div key={combo._id} variants={staggerItem}>
+                    <ComboCard $popular={combo.popular}>
+                      {combo.popular && (
+                        <PopularBadge>MOST POPULAR</PopularBadge>
                       )}
-                      <NewPrice>₹{combo.price.toLocaleString()}</NewPrice>
-                    </ComboPricing>
 
-                    <ComboButton
-                      onClick={() => openModal({
-                        category: "combo",
-                        serviceName: combo.name,
-                        tierName: combo.includes?.join(', ') || 'Combo Package',
-                        price: combo.price,
-                        originalPrice: combo.originalPrice,
-                        isCombo: true
-                      })}
-                    >
-                      BOOK NOW
-                    </ComboButton>
-                  </ComboCard>
-                </motion.div>
-              )) : <div style={{ textAlign: 'center', padding: '50px 20px', color: 'rgba(236, 236, 236, 0.4)' }}>No combo packages available</div>}
+                      <ComboTopBar />
+
+                      <ComboIconCircle>
+                        <i className={combo.icon} />
+                      </ComboIconCircle>
+
+                      <ComboName>{combo.name}</ComboName>
+
+                      <ComboIncludes>
+                        {combo.includes?.map((item, i) => (
+                          <li key={i}>
+                            <i className="fa-solid fa-check" />
+                            {item}
+                          </li>
+                        ))}
+                      </ComboIncludes>
+
+                      <ComboPricing>
+                        {combo.originalPrice && (
+                          <OldPrice>
+                            ₹{combo.originalPrice.toLocaleString()}
+                          </OldPrice>
+                        )}
+                        <NewPrice>₹{combo.price.toLocaleString()}</NewPrice>
+                      </ComboPricing>
+
+                      <ComboButton
+                        onClick={() =>
+                          openModal({
+                            category: "combo",
+                            serviceName: combo.name,
+                            tierName:
+                              combo.includes?.join(", ") || "Combo Package",
+                            price: combo.price,
+                            originalPrice: combo.originalPrice,
+                            isCombo: true,
+                          })
+                        }
+                      >
+                        BOOK NOW
+                      </ComboButton>
+                    </ComboCard>
+                  </motion.div>
+                ))
+              ) : (
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "50px 20px",
+                    color: "rgba(236, 236, 236, 0.4)",
+                  }}
+                >
+                  No combo packages available
+                </div>
+              )}
             </ComboGrid>
           </motion.div>
         </ComboSection>
 
-        {/* MOBILE STATS ABOVE CTA */}
-        <MobileStatsOnly>
+        {/* ✅ MOVED STATS STRIP HERE FOR ALL DEVICES */}
+        <motion.div
+          ref={statsRef}
+          initial="hidden"
+          animate={statsControls}
+          variants={staggerContainer}
+        >
           <StatsStrip>
-            <StatBlock>
-              <StatNumber>50+</StatNumber>
-              <StatLabel>Vehicles Protected</StatLabel>
-            </StatBlock>
+            <motion.div variants={staggerItem}>
+              <StatBlock>
+                <StatNumber>50+</StatNumber>
+                <StatLabel>Vehicles Protected</StatLabel>
+              </StatBlock>
+            </motion.div>
 
             <StatDivider />
 
-            <StatBlock>
-              <StatNumber>3 Years</StatNumber>
-              <StatLabel>Industry Experience</StatLabel>
-            </StatBlock>
+            <motion.div variants={staggerItem}>
+              <StatBlock>
+                <StatNumber>3 Years</StatNumber>
+                <StatLabel>Industry Experience</StatLabel>
+              </StatBlock>
+            </motion.div>
 
             <StatDivider />
 
-            <StatBlock>
-              <StatNumber>100%</StatNumber>
-              <StatLabel>Satisfaction Guaranteed</StatLabel>
-            </StatBlock>
+            <motion.div variants={staggerItem}>
+              <StatBlock>
+                <StatNumber>100%</StatNumber>
+                <StatLabel>Satisfaction Guaranteed</StatLabel>
+              </StatBlock>
+            </motion.div>
           </StatsStrip>
-        </MobileStatsOnly>
+        </motion.div>
 
         {/* CTA */}
         <AnimatedSection animation="fadeInUp">
@@ -368,12 +397,12 @@ const Services = () => {
               </CTASubtitle>
 
               <CTAButtons>
-                <PrimaryButton onClick={() => navigate('/products')}>
+                <PrimaryButton onClick={() => navigate("/products")}>
                   <i className="fa-solid fa-box" />
                   VIEW PRODUCTS
                 </PrimaryButton>
 
-                <SecondaryButton onClick={() => navigate('/contact')}>
+                <SecondaryButton onClick={() => navigate("/contact")}>
                   <i className="fa-solid fa-phone" />
                   CONTACT US
                 </SecondaryButton>

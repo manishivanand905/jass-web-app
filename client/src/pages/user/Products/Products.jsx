@@ -6,12 +6,6 @@ import { API_BASE } from "../../../config/api";
 import Sidebar from "../../../components/common/Sidebar/Sidebar";
 import {
   ProductsWrapper,
-  HeroSection,
-  HeroOverlay,
-  HeroContent,
-  Eyebrow,
-  HeroTitle,
-  HeroSubtitle,
   MobileStatsRow,
   MobileStat,
   FilterBar,
@@ -122,21 +116,6 @@ const Products = () => {
   return (
     <Sidebar type="user">
       <ProductsWrapper>
-        {/* Hero Section */}
-        <HeroSection>
-          <HeroOverlay />
-          <HeroContent>
-            <Eyebrow>OUR RANGE</Eyebrow>
-            <HeroTitle>
-              ALL <span>PRODUCTS</span>
-            </HeroTitle>
-            <HeroSubtitle>
-              From professional PPF films to ceramic coatings and detailing
-              accessories
-            </HeroSubtitle>
-          </HeroContent>
-        </HeroSection>
-
         {/* Mobile Stats */}
         <MobileStatsRow>
           <MobileStat>

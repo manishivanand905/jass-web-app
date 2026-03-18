@@ -19,7 +19,7 @@ export const ServicesWrapper = styled.div`
 export const HeroSection = styled.div`
   position: relative;
   width: 100%;
-  height: 350px;
+  height: 300px;
   background-image: url("https://images.pexels.com/photos/20051463/pexels-photo-20051463.jpeg");
   background-size: cover;
   background-position: center;
@@ -30,7 +30,7 @@ export const HeroSection = styled.div`
   border-top: 2px solid #cc0000;
 
   @media (max-width: 768px) {
-    height: 280px;
+    height: 250px;
     padding: 0 30px;
   }
 `;

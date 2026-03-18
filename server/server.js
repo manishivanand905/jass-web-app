@@ -18,7 +18,8 @@ const notificationRoutes = require("./routes/notificationRoutes");
 const searchRoutes = require("./routes/searchRoutes");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = Number(process.env.PORT) || 5000;
+const MAX_PORT_ATTEMPTS = 10;
 
 const explicitOrigins = [
   process.env.FRONTEND_URL,
@@ -70,14 +71,55 @@ app.use("/api/search", searchRoutes);
 
 app.use(errorHandler);
 
+const startListening = (initialPort) =>
+  new Promise((resolve, reject) => {
+    const tryPort = (port, attemptsLeft) => {
+      const server = app.listen(port);
+
+      server.once("listening", () => {
+        resolve({ server, port });
+      });
+
+      server.once("error", (error) => {
+        server.close(() => {
+          if (error.code === "EADDRINUSE" && attemptsLeft > 0) {
+            const nextPort = port + 1;
+            console.warn(
+              `Port ${port} is already in use. Trying port ${nextPort}...`
+            );
+            tryPort(nextPort, attemptsLeft - 1);
+            return;
+          }
+
+          if (error.code === "EADDRINUSE") {
+            reject(
+              new Error(
+                `Ports ${initialPort}-${port} are in use. Stop the existing process or set PORT to a different value.`
+              )
+            );
+            return;
+          }
+
+          if (error.code === "EACCES") {
+            reject(new Error(`Port ${port} requires elevated privileges.`));
+            return;
+          }
+
+          reject(error);
+        });
+      });
+    };
+
+    tryPort(initialPort, MAX_PORT_ATTEMPTS);
+  });
+
 const startServer = async () => {
   try {
     await connectDB();
-    app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
-    });
+    const { port } = await startListening(PORT);
+    console.log(`Server running on http://localhost:${port}`);
   } catch (error) {
-    console.error("MongoDB connection error:", error.message);
+    console.error("Server startup error:", error.message);
     process.exit(1);
   }
 };

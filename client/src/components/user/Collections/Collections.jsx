@@ -99,6 +99,7 @@ const Collections = () => {
                   aria-label="Add to cart"
                   title="Add to cart"
                 >
+                  Add to Cart
                   <i className="fa-solid fa-cart-plus arrow-icon" />
                 </ViewDetailsBtn>
               </CardFooter>
