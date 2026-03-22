@@ -111,6 +111,11 @@ export const BottomLink = styled.div`
   font-family: "Cormorant Garamond", serif;
   font-size: 0.95rem;
   color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
 
   button {
     background: none;
@@ -123,6 +128,28 @@ export const BottomLink = styled.div`
     &:hover {
       color: #ff0000;
     }
+  }
+
+  .subscribe-cta {
+    padding: 12px 20px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 80, 80, 0.65);
+    background: linear-gradient(135deg, #ff2b2b 0%, #a60000 100%);
+    color: #fff;
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    box-shadow: 0 12px 28px rgba(204, 0, 0, 0.28);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+  }
+
+  .subscribe-cta:hover {
+    color: #fff;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 16px 34px rgba(204, 0, 0, 0.4);
+    filter: brightness(1.08);
   }
 `;
 
@@ -487,6 +514,11 @@ export const BottomText = styled.p`
   font-family: "Cormorant Garamond", serif;
   font-size: 0.95rem;
   color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
 
   button {
     background: none;
@@ -500,6 +532,30 @@ export const BottomText = styled.p`
       color: #ff0000;
       text-decoration: underline;
     }
+  }
+
+  .subscribe-cta {
+    padding: 11px 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 80, 80, 0.6);
+    background: radial-gradient(circle at top, #ff4d4d 0%, #cc0000 55%, #850000 100%);
+    color: #fff;
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    text-decoration: none;
+    box-shadow: 0 10px 24px rgba(204, 0, 0, 0.24);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+  }
+
+  .subscribe-cta:hover {
+    color: #fff;
+    text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(204, 0, 0, 0.34);
+    filter: brightness(1.08);
   }
 `;
 

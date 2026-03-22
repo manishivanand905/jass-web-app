@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Email is required'],
     unique: true,
     lowercase: true,
-    match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
+    match: [/^[a-z0-9._%+-]+@gmail\.com$/i, 'Please enter a valid Gmail address']
   },
   password: {
     type: String,
@@ -25,6 +25,10 @@ const userSchema = new mongoose.Schema({
     trim: true
   },
   city: {
+    type: String,
+    trim: true
+  },
+  address: {
     type: String,
     trim: true
   },

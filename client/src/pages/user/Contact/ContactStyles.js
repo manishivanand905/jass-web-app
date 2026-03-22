@@ -166,7 +166,151 @@ export const MainContent = styled.div`
   }
 `;
 
-export const LeftColumn = styled.div``;
+export const LeftColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+`;
+
+export const ActionHub = styled.div`
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top right, rgba(204, 0, 0, 0.22), transparent 38%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 34px;
+
+  @media (max-width: 640px) {
+    padding: 24px 18px;
+  }
+`;
+
+export const ActionEyebrow = styled.div`
+  font-family: "Barlow Condensed", Arial, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #cc0000;
+  margin-bottom: 12px;
+`;
+
+export const ActionTitle = styled.h2`
+  font-family: "Barlow Condensed", Arial, sans-serif;
+  font-size: clamp(2.2rem, 4vw, 3.6rem);
+  font-weight: 900;
+  line-height: 0.96;
+  text-transform: uppercase;
+  color: #ffffff;
+  margin: 0 0 14px;
+
+  span {
+    color: #cc0000;
+  }
+`;
+
+export const ActionSubtitle = styled.p`
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.08rem;
+  font-style: italic;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.68);
+  margin: 0 0 28px;
+`;
+
+export const ActionGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const ActionCard = styled.div`
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 100%;
+`;
+
+export const ActionIcon = styled.div`
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(204, 0, 0, 0.12);
+  color: #ff6666;
+  font-size: 1.4rem;
+`;
+
+export const ActionCardTitle = styled.h3`
+  font-family: "Barlow Condensed", Arial, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #ffffff;
+  margin: 0;
+`;
+
+export const ActionCardText = styled.p`
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.02rem;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.68);
+  line-height: 1.7;
+  margin: 0;
+`;
+
+export const ActionButton = styled.button`
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: fit-content;
+  padding: 14px 22px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #cc0000, #ff2b2b);
+  color: #ffffff;
+  font-family: "Barlow Condensed", Arial, sans-serif;
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 16px 30px rgba(204, 0, 0, 0.24);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 34px rgba(204, 0, 0, 0.32);
+  }
+`;
+
+export const ActionNote = styled.div`
+  margin-top: 22px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: "Barlow Condensed", Arial, sans-serif;
+  font-size: 0.88rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.64);
+`;
 
 export const RightColumn = styled.div`
   display: flex;

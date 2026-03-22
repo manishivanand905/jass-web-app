@@ -12,6 +12,7 @@ const Contacts = () => {
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
+  const [requestTypeFilter, setRequestTypeFilter] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedContact, setSelectedContact] = useState(null);
@@ -22,7 +23,7 @@ const Contacts = () => {
       const token = localStorage.getItem('adminToken');
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
       const { data } = await axios.get(`${apiUrl}/api/contacts`, {
-        params: { page, limit: 10, status: statusFilter },
+        params: { page, limit: 10, status: statusFilter, requestType: requestTypeFilter },
         headers: { Authorization: `Bearer ${token}` }
       });
       setContacts(data.contacts);
@@ -32,11 +33,15 @@ const Contacts = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, statusFilter]);
+  }, [page, requestTypeFilter, statusFilter]);
 
   useEffect(() => {
     fetchContacts();
   }, [fetchContacts]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [requestTypeFilter, statusFilter]);
 
   const updateStatus = async () => {
     try {
@@ -59,6 +64,10 @@ const Contacts = () => {
     return colors[status] || '#999';
   };
 
+  const formatRequestType = (requestType) => {
+    return requestType === 'ticket' ? 'Ticket' : 'Enquiry';
+  };
+
   return (
     <AdminLayout>
       <Container>
@@ -70,6 +79,11 @@ const Contacts = () => {
               <Chip $active={statusFilter === 'new'} onClick={() => setStatusFilter('new')}>New</Chip>
               <Chip $active={statusFilter === 'contacted'} onClick={() => setStatusFilter('contacted')}>Contacted</Chip>
               <Chip $active={statusFilter === 'resolved'} onClick={() => setStatusFilter('resolved')}>Resolved</Chip>
+            </FilterChips>
+            <FilterChips>
+              <Chip $active={requestTypeFilter === ''} onClick={() => setRequestTypeFilter('')}>All Types</Chip>
+              <Chip $active={requestTypeFilter === 'enquiry'} onClick={() => setRequestTypeFilter('enquiry')}>Enquiries</Chip>
+              <Chip $active={requestTypeFilter === 'ticket'} onClick={() => setRequestTypeFilter('ticket')}>Tickets</Chip>
             </FilterChips>
           </HeaderActions>
         </Header>
@@ -86,10 +100,11 @@ const Contacts = () => {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableCell>Type</TableCell>
                   <TableCell>Name</TableCell>
                   <TableCell>Email</TableCell>
                   <TableCell>Phone</TableCell>
-                  <TableCell>Service</TableCell>
+                  <TableCell>Subject</TableCell>
                   <TableCell>Message</TableCell>
                   <TableCell>Date</TableCell>
                   <TableCell>Status</TableCell>
@@ -99,11 +114,12 @@ const Contacts = () => {
               <TableBody>
                 {contacts.map(contact => (
                   <TableRow key={contact._id} $unread={contact.status === 'new'}>
+                    <TableCell>{formatRequestType(contact.requestType)}</TableCell>
                     <TableCell>{contact.name}</TableCell>
                     <TableCell>{contact.email}</TableCell>
                     <TableCell>{contact.phone}</TableCell>
                     <TableCell>{contact.service}</TableCell>
-                    <TableCell>{contact.message.substring(0, 50)}...</TableCell>
+                    <TableCell>{contact.message.length > 50 ? `${contact.message.substring(0, 50)}...` : contact.message}</TableCell>
                     <TableCell>{new Date(contact.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell>
                       <StatusBadge $color={getStatusColor(contact.status)}>{contact.status}</StatusBadge>
@@ -139,6 +155,10 @@ const Contacts = () => {
                 </ModalHeader>
                 <DetailGrid>
                   <DetailItem>
+                    <DetailLabel>Request Type</DetailLabel>
+                    <DetailValue>{formatRequestType(selectedContact.requestType)}</DetailValue>
+                  </DetailItem>
+                  <DetailItem>
                     <DetailLabel>Name</DetailLabel>
                     <DetailValue>{selectedContact.name}</DetailValue>
                   </DetailItem>
@@ -151,7 +171,7 @@ const Contacts = () => {
                     <DetailValue>{selectedContact.phone}</DetailValue>
                   </DetailItem>
                   <DetailItem>
-                    <DetailLabel>Service</DetailLabel>
+                    <DetailLabel>Subject / Related Service</DetailLabel>
                     <DetailValue>{selectedContact.service}</DetailValue>
                   </DetailItem>
                   {selectedContact.preferredDate && (

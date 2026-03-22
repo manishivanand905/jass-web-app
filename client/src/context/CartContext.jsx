@@ -1,6 +1,9 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { useAuth } from './AuthContext';
 
 const CartContext = createContext();
+const LEGACY_CART_KEY = 'cart';
+const GUEST_CART_KEY = 'guest_cart';
 
 export const useCart = () => {
   const context = useContext(CartContext);
@@ -9,34 +12,42 @@ export const useCart = () => {
 };
 
 export const CartProvider = ({ children }) => {
-  const [cart, setCart] = useState(() => {
-    try {
-      const savedCart = localStorage.getItem('cart');
-      console.log('Loading cart from localStorage:', savedCart);
-      if (savedCart) {
-        const parsed = JSON.parse(savedCart);
-        console.log('Parsed cart:', parsed);
-        return parsed;
-      }
-    } catch (error) {
-      console.error('Failed to parse cart:', error);
-    }
-    return [];
-  });
+  const { user } = useAuth();
+  const [cart, setCart] = useState([]);
+  const skipNextPersistRef = useRef(false);
+  const storageKey = user?.id ? `cart:${user.id}` : GUEST_CART_KEY;
 
   useEffect(() => {
     try {
-      console.log('Saving cart to localStorage:', cart);
-      localStorage.setItem('cart', JSON.stringify(cart));
+      // Drop the old shared cart key so guests do not inherit stale/demo items.
+      localStorage.removeItem(LEGACY_CART_KEY);
+
+      const savedCart = localStorage.getItem(storageKey);
+      const parsedCart = savedCart ? JSON.parse(savedCart) : [];
+      setCart(Array.isArray(parsedCart) ? parsedCart : []);
+      skipNextPersistRef.current = true;
+    } catch (error) {
+      console.error('Failed to load cart:', error);
+      setCart([]);
+    }
+  }, [storageKey]);
+
+  useEffect(() => {
+    if (skipNextPersistRef.current) {
+      skipNextPersistRef.current = false;
+      return;
+    }
+
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(cart));
     } catch (error) {
       console.error('Failed to save cart:', error);
     }
-  }, [cart]);
+  }, [cart, storageKey]);
 
   const addToCart = (product, quantity = 1) => {
     const productId = String(product._id || product.id);
-    console.log('Adding to cart:', { productId, product });
-    
+
     setCart(prev => {
       const existing = prev.find(item => String(item._id || item.id || item.product) === productId);
       if (existing) {

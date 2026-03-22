@@ -194,7 +194,30 @@ const ProductDetail = () => {
               <span className="count">{product.ratingCount || 0} reviews</span>
             </RatingRow>
 
-            <Price>₹{product.price?.toLocaleString()}</Price>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "flex-end",
+                justifyContent: "space-between",
+                gap: "20px",
+                flexWrap: "wrap",
+              }}
+            >
+              <Price>₹{product.price?.toLocaleString()}</Price>
+              <BookButton
+                onClick={handleAddToCart}
+                disabled={!product.available}
+                aria-label={product.available ? "Add to cart" : "Out of stock"}
+                title={product.available ? "Add to cart" : "Out of stock"}
+                style={{
+                  flex: "0 0 auto",
+                  minWidth: "220px",
+                  marginTop: 0,
+                }}
+              >
+                {product.available ? "ADD TO CART" : "OUT OF STOCK"}
+              </BookButton>
+            </div>
             {!product.available && (
               <div
                 style={{
@@ -358,14 +381,6 @@ const ProductDetail = () => {
             )}
 
             <ActionRow>
-              <BookButton
-                onClick={handleAddToCart}
-                disabled={!product.available}
-                aria-label={product.available ? "Add to cart" : "Out of stock"}
-                title={product.available ? "Add to cart" : "Out of stock"}
-              >
-                {product.available ? "ADD TO CART" : "OUT OF STOCK"}
-              </BookButton>
               <BackButton onClick={() => navigate(-1)}>
                 <i className="fa-solid fa-arrow-left" />
                 BACK

@@ -20,7 +20,7 @@ const Profile = () => {
       phone: user?.phone || "",
       email: user?.email || "",
       city: user?.city || "",
-      vehicleModel: user?.vehicleModel || ""
+      address: user?.address || ""
     }
   });
   const [loading, setLoading] = useState(false);
@@ -36,7 +36,7 @@ const Profile = () => {
       setValue('phone', user.phone || "");
       setValue('email', user.email || "");
       setValue('city', user.city || "");
-      setValue('vehicleModel', user.vehicleModel || "");
+      setValue('address', user.address || "");
     }
   }, [user, setValue]);
 
@@ -69,7 +69,7 @@ const Profile = () => {
           phone: data.phone,
           email: data.email,
           city: data.city,
-          vehicleModel: data.vehicleModel
+          address: data.address
         })
       });
       const result = await response.json();
@@ -82,7 +82,7 @@ const Profile = () => {
           phone: data.phone,
           email: data.email,
           city: data.city,
-          vehicleModel: data.vehicleModel
+          address: data.address
         });
       } else {
         toast.error(result.message || "Failed to update profile");
@@ -205,11 +205,11 @@ const Profile = () => {
                 </InputGroup>
 
                 <InputGroup>
-                  <Label>Vehicle Model</Label>
+                  <Label>Delivery Address</Label>
                   <div style={{ position: 'relative' }}>
-                    <InputIcon className="fa-solid fa-car" />
+                    <InputIcon className="fa-solid fa-map-location-dot" />
                     <Input
-                      {...register("vehicleModel")}
+                      {...register("address")}
                     />
                   </div>
                 </InputGroup>

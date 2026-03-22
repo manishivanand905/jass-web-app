@@ -5,9 +5,30 @@ const { createNotificationForUser, createNotificationForAdmin } = require('./not
 
 exports.createOrder = async (req, res) => {
   try {
-    const order = await Order.create({ ...req.body, user: req.user?._id });
-    
     const user = await User.findById(req.user?._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const customerName = req.body.customerName || user.name;
+    const customerEmail = req.body.customerEmail || user.email;
+    const customerPhone = req.body.customerPhone || user.phone;
+
+    if (!customerName || !customerEmail) {
+      return res.status(400).json({
+        success: false,
+        message: 'Customer profile is incomplete. Please update your name and email before placing an order.'
+      });
+    }
+
+    const order = await Order.create({
+      ...req.body,
+      user: req.user?._id,
+      customerName,
+      customerEmail,
+      customerPhone
+    });
+
     if (user) {
       sendOrderConfirmationEmail(order, user);
     }
@@ -16,8 +37,8 @@ exports.createOrder = async (req, res) => {
     await createNotificationForUser(
       req.user._id,
       'order_confirmation',
-      'Order Confirmed!',
-      `Your order #${order.orderId} has been confirmed and is being processed.`,
+      'Order Placed',
+      `Your order #${order.orderId} has been placed successfully.`,
       'fa-solid fa-shopping-bag',
       order._id,
       'Order'
@@ -60,12 +81,26 @@ exports.getUserOrders = async (req, res) => {
 exports.updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
+    const existingOrder = await Order.findById(req.params.id);
+    if (!existingOrder) return res.status(404).json({ success: false, message: 'Order not found' });
+
     const order = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true });
-    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
     
     const user = await User.findById(order.user);
     if (user) {
       sendOrderStatusUpdateEmail(order, user);
+
+      if (status === 'confirmed' && existingOrder.status !== 'confirmed') {
+        await createNotificationForUser(
+          order.user,
+          'order_confirmation',
+          'Order Confirmed',
+          `Your order #${order.orderId} has been confirmed by our team.`,
+          'fa-solid fa-shopping-bag',
+          order._id,
+          'Order'
+        );
+      }
     }
     
     res.json({ success: true, order });

@@ -3,19 +3,29 @@ const { createNotificationForAdmin } = require('./notificationController');
 
 exports.createContact = async (req, res) => {
   try {
-    const contact = await Contact.create(req.body);
+    const requestType = req.body.requestType === 'ticket' ? 'ticket' : 'enquiry';
+    const contactPayload = {
+      ...req.body,
+      requestType
+    };
+    const contact = await Contact.create(contactPayload);
+    const requestLabel = requestType === 'ticket' ? 'Ticket' : 'Enquiry';
     
     // Create notification for admin
     await createNotificationForAdmin(
       'new_contact',
-      'New Contact Request!',
-      `${contact.name} sent a message: "${contact.message.substring(0, 50)}..."`,
+      `New ${requestLabel} Received!`,
+      `${contact.name} submitted a ${requestType}: "${contact.message.substring(0, 50)}..."`,
       'fa-solid fa-envelope',
       contact._id,
       'Contact'
     );
     
-    res.status(201).json({ success: true, contact, message: 'Message sent successfully' });
+    res.status(201).json({
+      success: true,
+      contact,
+      message: requestType === 'ticket' ? 'Ticket raised successfully' : 'Enquiry sent successfully'
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -23,9 +33,18 @@ exports.createContact = async (req, res) => {
 
 exports.getContacts = async (req, res) => {
   try {
-    const { page = 1, limit = 10, status = '' } = req.query;
+    const { page = 1, limit = 10, status = '', requestType = '' } = req.query;
     
-    const query = status ? { status } : {};
+    const query = {};
+
+    if (status) {
+      query.status = status;
+    }
+
+    if (requestType) {
+      query.requestType = requestType;
+    }
+
     const total = await Contact.countDocuments(query);
     const contacts = await Contact.find(query)
       .limit(limit * 1)

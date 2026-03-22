@@ -4,27 +4,118 @@ const { generateToken } = require('../utils/jwt');
 const { sendRegistrationEmail, sendLoginEmail, sendPasswordResetOtpEmail } = require('../services/emailService');
 
 const hashOtp = (otp) => crypto.createHash('sha256').update(otp).digest('hex');
+const GMAIL_PATTERN = /^[a-z0-9._%+-]+@gmail\.com$/i;
+const PHONE_PATTERN = /^\d{10}$/;
+
+const normalizePhone = (phone) => phone?.replace(/\D/g, '').trim();
+const isGmail = (value) => GMAIL_PATTERN.test(value || '');
+const isPhone = (value) => PHONE_PATTERN.test(value || '');
+
+const sanitizeAddress = (address = {}) => ({
+  fullName: address.fullName?.trim() || '',
+  phone: address.phone?.trim() || '',
+  addressLine: address.addressLine?.trim() || '',
+  city: address.city?.trim() || '',
+  state: address.state?.trim() || '',
+  pincode: address.pincode?.trim() || '',
+  isDefault: Boolean(address.isDefault)
+});
+
+const buildSeedAddress = ({ fullName, phone, addressLine, city }) => {
+  if (!addressLine?.trim()) return null;
+
+  return {
+    fullName: fullName?.trim() || '',
+    phone: phone?.trim() || '',
+    addressLine: addressLine.trim(),
+    city: city?.trim() || '',
+    state: '',
+    pincode: '',
+    isDefault: true
+  };
+};
+
+const syncDefaultAddress = (user, { fullName, phone, addressLine, city }) => {
+  const seedAddress = buildSeedAddress({ fullName, phone, addressLine, city });
+  if (!seedAddress) return;
+
+  const defaultIndex = user.addresses.findIndex((item) => item.isDefault);
+  if (defaultIndex >= 0) {
+    user.addresses[defaultIndex].fullName = seedAddress.fullName;
+    user.addresses[defaultIndex].phone = seedAddress.phone;
+    user.addresses[defaultIndex].addressLine = seedAddress.addressLine;
+    user.addresses[defaultIndex].city = seedAddress.city;
+  } else {
+    user.addresses.push(seedAddress);
+  }
+};
+
+const formatUserResponse = (user) => ({
+  id: user._id,
+  name: user.name,
+  email: user.email,
+  phone: user.phone,
+  city: user.city,
+  address: user.address,
+  addresses: user.addresses || [],
+  role: user.role
+});
 
 exports.register = async (req, res) => {
   try {
-    const { name, firstName, lastName, email, password, phone, city, vehicleModel } = req.body;
+    const { name, firstName, lastName, email, password, phone, city, address } = req.body;
     const normalizedEmail = email?.toLowerCase().trim();
+    const normalizedPhone = normalizePhone(phone);
+    const normalizedAddress = address?.trim();
     
     const fullName = name || `${firstName || ''} ${lastName || ''}`.trim();
+
+    if (!isGmail(normalizedEmail)) {
+      return res.status(400).json({ success: false, message: 'Please enter a valid Gmail address' });
+    }
+
+    if (!isPhone(normalizedPhone)) {
+      return res.status(400).json({ success: false, message: 'Please enter a valid 10-digit mobile number' });
+    }
 
     const userExists = await User.findOne({ email: normalizedEmail });
     if (userExists) {
       return res.status(400).json({ success: false, message: 'User already exists' });
     }
 
-    const user = await User.create({ name: fullName, email: normalizedEmail, password, phone, city, vehicleModel });
+    const phoneExists = await User.findOne({ phone: normalizedPhone });
+    if (phoneExists) {
+      return res.status(400).json({ success: false, message: 'Mobile number already in use' });
+    }
+
+    const user = await User.create({
+      name: fullName,
+      email: normalizedEmail,
+      password,
+      phone: normalizedPhone,
+      city,
+      address: normalizedAddress,
+      addresses: buildSeedAddress({
+        fullName,
+        phone: normalizedPhone,
+        addressLine: normalizedAddress,
+        city
+      }) ? [
+        buildSeedAddress({
+          fullName,
+          phone: normalizedPhone,
+          addressLine: normalizedAddress,
+          city
+        })
+      ] : []
+    });
     const token = generateToken(user._id);
 
     sendRegistrationEmail(user);
 
     res.status(201).json({
       success: true,
-      user: { id: user._id, name: user.name, email: user.email, phone: user.phone, city: user.city, vehicleModel: user.vehicleModel, role: user.role },
+      user: formatUserResponse(user),
       token
     });
   } catch (error) {
@@ -35,11 +126,20 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const normalizedEmail = email?.toLowerCase().trim();
+    const identifier = email?.trim();
+    const normalizedEmail = identifier?.toLowerCase();
+    const normalizedPhone = normalizePhone(identifier);
+    const query = isPhone(normalizedPhone)
+      ? { phone: normalizedPhone }
+      : { email: normalizedEmail };
 
-    const user = await User.findOne({ email: normalizedEmail }).select('+password');
-    if (!user || !(await user.comparePassword(password))) {
-      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    const user = await User.findOne(query).select('+password');
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Account not registered with us. Please subscribe.' });
+    }
+
+    if (!(await user.comparePassword(password))) {
+      return res.status(401).json({ success: false, message: 'Invalid password' });
     }
 
     const token = generateToken(user._id);
@@ -48,7 +148,7 @@ exports.login = async (req, res) => {
 
     res.json({
       success: true,
-      user: { id: user._id, name: user.name, email: user.email, phone: user.phone, city: user.city, vehicleModel: user.vehicleModel, role: user.role },
+      user: formatUserResponse(user),
       token
     });
   } catch (error) {
@@ -161,7 +261,7 @@ exports.resetPasswordWithOtp = async (req, res) => {
 
 exports.getMe = async (req, res) => {
   try {
-    res.json({ success: true, user: req.user });
+    res.json({ success: true, user: formatUserResponse(req.user) });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -169,8 +269,10 @@ exports.getMe = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
   try {
-    const { name, phone, email, city, vehicleModel } = req.body;
+    const { name, phone, email, city, address } = req.body;
     const normalizedEmail = email?.toLowerCase().trim();
+    const normalizedPhone = normalizePhone(phone);
+    const normalizedAddress = address?.trim();
     
     const user = await User.findById(req.user.id);
     if (!user) {
@@ -178,23 +280,83 @@ exports.updateProfile = async (req, res) => {
     }
 
     if (normalizedEmail && normalizedEmail !== user.email) {
+      if (!isGmail(normalizedEmail)) {
+        return res.status(400).json({ success: false, message: 'Please enter a valid Gmail address' });
+      }
+
       const emailExists = await User.findOne({ email: normalizedEmail });
       if (emailExists) {
         return res.status(400).json({ success: false, message: 'Email already in use' });
       }
     }
 
+    if (normalizedPhone && normalizedPhone !== user.phone) {
+      if (!isPhone(normalizedPhone)) {
+        return res.status(400).json({ success: false, message: 'Please enter a valid 10-digit mobile number' });
+      }
+
+      const phoneExists = await User.findOne({ phone: normalizedPhone });
+      if (phoneExists) {
+        return res.status(400).json({ success: false, message: 'Mobile number already in use' });
+      }
+    }
+
     user.name = name || user.name;
-    user.phone = phone || user.phone;
+    user.phone = normalizedPhone || user.phone;
     user.email = normalizedEmail || user.email;
     user.city = city || user.city;
-    user.vehicleModel = vehicleModel || user.vehicleModel;
+    user.address = normalizedAddress !== undefined ? normalizedAddress : user.address;
+    syncDefaultAddress(user, {
+      fullName: user.name,
+      phone: user.phone,
+      addressLine: user.address,
+      city: user.city
+    });
 
     await user.save();
 
     res.json({
       success: true,
-      user: { id: user._id, name: user.name, email: user.email, phone: user.phone, city: user.city, vehicleModel: user.vehicleModel, role: user.role }
+      user: formatUserResponse(user)
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.addAddress = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const address = sanitizeAddress(req.body);
+    if (!address.fullName || !address.phone || !address.addressLine || !address.city) {
+      return res.status(400).json({ success: false, message: 'Full name, phone, city and address are required' });
+    }
+
+    if (address.isDefault || user.addresses.length === 0) {
+      user.addresses.forEach((item) => {
+        item.isDefault = false;
+      });
+      address.isDefault = true;
+    }
+
+    user.addresses.push(address);
+
+    if (address.isDefault) {
+      user.address = address.addressLine;
+      user.city = address.city;
+      user.phone = address.phone || user.phone;
+    }
+
+    await user.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'Address added successfully',
+      user: formatUserResponse(user)
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

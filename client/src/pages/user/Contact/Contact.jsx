@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Sidebar from "../../../components/common/Sidebar/Sidebar";
 import Footer from "../../../components/common/Footer/Footer";
 import ContactForm from "../../../components/user/ContactForm/ContactForm";
@@ -19,6 +20,17 @@ import {
   ContactSubtext,
   MainContent,
   LeftColumn,
+  ActionHub,
+  ActionEyebrow,
+  ActionTitle,
+  ActionSubtitle,
+  ActionGrid,
+  ActionCard,
+  ActionIcon,
+  ActionCardTitle,
+  ActionCardText,
+  ActionButton,
+  ActionNote,
   RightColumn,
   InfoCard,
   CardHeader,
@@ -44,7 +56,8 @@ import {
 
 const Contact = () => {
   const { openModal } = useBookingModal();
-  
+  const [activeFormType, setActiveFormType] = useState(null);
+
   const getCurrentDay = () => {
     const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     return days[new Date().getDay()];
@@ -54,10 +67,10 @@ const Contact = () => {
     const now = new Date();
     const day = now.getDay();
     const hour = now.getHours();
-    
-    if (day === 0) return false; // Sunday
-    if (day === 6) return hour >= 9 && hour < 17; // Saturday 9-5
-    return hour >= 9 && hour < 19; // Mon-Fri 9-7
+
+    if (day === 0) return false;
+    if (day === 6) return hour >= 9 && hour < 17;
+    return hour >= 9 && hour < 19;
   };
 
   return (
@@ -71,7 +84,7 @@ const Contact = () => {
               Contact <span>Us</span>
             </HeroTitle>
             <HeroSubtitle>
-              Book a service, ask a question or visit our studio — we're here to help
+              Raise a support ticket, ask a query, or visit our studio. We are here to help.
             </HeroSubtitle>
           </HeroContent>
         </HeroSection>
@@ -83,7 +96,7 @@ const Contact = () => {
             </ContactIcon>
             <ContactLabel>CALL US</ContactLabel>
             <ContactValue>{contactInfo.phone}</ContactValue>
-            <ContactSubtext>Mon–Sat, 9AM–7PM</ContactSubtext>
+            <ContactSubtext>Mon-Sat, 9AM-7PM</ContactSubtext>
           </ContactBlock>
 
           <ContactBlock as="a" href={`mailto:${contactInfo.email}`}>
@@ -104,7 +117,12 @@ const Contact = () => {
             <ContactSubtext>{contactInfo.address.line2}</ContactSubtext>
           </ContactBlock>
 
-          <ContactBlock as="a" href={`https://wa.me/${contactInfo.whatsapp.replace(/\s/g, '')}`} target="_blank" rel="noopener noreferrer">
+          <ContactBlock
+            as="a"
+            href={`https://wa.me/${contactInfo.whatsapp.replace(/\s/g, "")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <ContactIcon>
               <i className="fa-brands fa-whatsapp" />
             </ContactIcon>
@@ -116,7 +134,50 @@ const Contact = () => {
 
         <MainContent>
           <LeftColumn>
-            <ContactForm />
+            <ActionHub>
+              <ActionEyebrow>CONTACT DESK</ActionEyebrow>
+              <ActionTitle>
+                Choose Your <span>Request</span>
+              </ActionTitle>
+              <ActionSubtitle>
+                Instead of the old lets-talk form, choose the request type that fits best. Both enquiry forms and raised
+                tickets are saved directly to the backend contacts section for your team.
+              </ActionSubtitle>
+
+              <ActionGrid>
+                <ActionCard>
+                  <ActionIcon>
+                    <i className="fa-solid fa-circle-question" />
+                  </ActionIcon>
+                  <ActionCardTitle>Ask a Query</ActionCardTitle>
+                  <ActionCardText>
+                    Use this for pricing questions, service details, appointment clarifications, or any general
+                    enquiry before you book.
+                  </ActionCardText>
+                  <ActionButton type="button" onClick={() => setActiveFormType("enquiry")}>
+                    <i className="fa-solid fa-paper-plane" />
+                    Open Enquiry
+                  </ActionButton>
+                </ActionCard>
+
+                <ActionCard>
+                  <ActionIcon>
+                    <i className="fa-solid fa-life-ring" />
+                  </ActionIcon>
+                  <ActionCardTitle>Raise a Ticket</ActionCardTitle>
+                  <ActionCardText>
+                    Use this when you need help with a delivery issue, service follow-up, support problem, or an update
+                    request from our team.
+                  </ActionCardText>
+                  <ActionButton type="button" onClick={() => setActiveFormType("ticket")}>
+                    <i className="fa-solid fa-headset" />
+                    Raise Ticket
+                  </ActionButton>
+                </ActionCard>
+              </ActionGrid>
+
+              <ActionNote>Popup submissions now create separate enquiry and ticket records in contacts.</ActionNote>
+            </ActionHub>
           </LeftColumn>
 
           <RightColumn>
@@ -124,9 +185,7 @@ const Contact = () => {
               <CardHeader>
                 <i className="fa-solid fa-clock" />
                 OPENING HOURS
-                <StatusBadge $open={isOpenNow()}>
-                  {isOpenNow() ? "OPEN NOW" : "CLOSED"}
-                </StatusBadge>
+                <StatusBadge $open={isOpenNow()}>{isOpenNow() ? "OPEN NOW" : "CLOSED"}</StatusBadge>
               </CardHeader>
               <HoursTable>
                 {contactInfo.hours.map((item, index) => (
@@ -185,9 +244,11 @@ const Contact = () => {
           <MapOverlay>
             <i className="fa-solid fa-location-dot" />
             <h3>Shield Pro Studio</h3>
-            <p>{contactInfo.address.line1}, {contactInfo.address.line2}</p>
+            <p>
+              {contactInfo.address.line1}, {contactInfo.address.line2}
+            </p>
             <a href={contactInfo.address.googleMapsUrl} target="_blank" rel="noopener noreferrer">
-              GET DIRECTIONS →
+              GET DIRECTIONS -&gt;
             </a>
           </MapOverlay>
         </MapSection>
@@ -213,6 +274,13 @@ const Contact = () => {
           </CTAContent>
         </CTABanner>
       </ContactWrapper>
+
+      <ContactForm
+        isOpen={Boolean(activeFormType)}
+        requestType={activeFormType || "enquiry"}
+        onClose={() => setActiveFormType(null)}
+      />
+
       <FooterFix>
         <Footer />
       </FooterFix>

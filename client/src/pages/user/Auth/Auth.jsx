@@ -470,7 +470,7 @@ const UserAuth = () => {
 
           <BottomLink>
             {isLogin ? (
-              <>New here? <button type="button" onClick={toggleMode}>Create Account →</button></>
+              <>Not registered with us? <button type="button" className="subscribe-cta" onClick={toggleMode}>Subscribe Now →</button></>
             ) : (
               <>Already a member? <button type="button" onClick={toggleMode}>Sign In →</button></>
             )}
@@ -497,21 +497,21 @@ const UserAuth = () => {
                 <Subtitle>
                   {isLogin
                     ? 'Access your bookings, orders and profile'
-                    : 'Get access to exclusive bookings and order tracking'}
+                    : 'Subscribe to get access to exclusive bookings and order tracking'}
                 </Subtitle>
 
                 <Form onSubmit={handleSubmit(onSubmit)}>
                   {isLogin ? (
                     <>
                       <InputGroup>
-                        <Label>Phone or Email</Label>
+                        <Label>Gmail or Mobile Number</Label>
                         <InputWrapper>
                           <InputIcon className="fa-solid fa-user" />
                           <Input
                             type="text"
-                            placeholder="Enter your phone or email"
+                            placeholder="Enter your Gmail or mobile number"
                             $hasError={!!errors.email}
-                            {...register('email', FORM_RULES.email)}
+                            {...register('email', FORM_RULES.loginIdentifier)}
                           />
                         </InputWrapper>
                         {errors.email && <ErrorMessage>{errors.email.message}</ErrorMessage>}
@@ -605,12 +605,12 @@ const UserAuth = () => {
                         </InputGroup>
 
                         <InputGroup>
-                          <Label>Email Address</Label>
+                          <Label>Gmail Address</Label>
                           <InputWrapper>
                             <InputIcon className="fa-solid fa-envelope" />
                             <Input
                               type="email"
-                              placeholder="Email address"
+                              placeholder="yourname@gmail.com"
                               $hasError={!!errors.email}
                               {...register('email', FORM_RULES.email)}
                             />
@@ -635,13 +635,13 @@ const UserAuth = () => {
                         </InputGroup>
 
                         <InputGroup>
-                          <Label>Vehicle Model (Optional)</Label>
+                          <Label>Delivery Address</Label>
                           <InputWrapper>
-                            <InputIcon className="fa-solid fa-car" />
+                            <InputIcon className="fa-solid fa-map-location-dot" />
                             <Input
                               type="text"
-                              placeholder="e.g., BMW X5"
-                              {...register('vehicleModel')}
+                              placeholder="Enter your delivery address"
+                              {...register('address')}
                             />
                           </InputWrapper>
                         </InputGroup>
@@ -729,7 +729,7 @@ const UserAuth = () => {
 
                   <BottomText>
                     {isLogin ? (
-                      <>Don't have an account? <button type="button" onClick={toggleMode}>Create one →</button></>
+                      <>Account not registered with us? <button type="button" className="subscribe-cta" onClick={toggleMode}>Subscribe Now →</button></>
                     ) : (
                       <>Already have an account? <button type="button" onClick={toggleMode}>Login →</button></>
                     )}

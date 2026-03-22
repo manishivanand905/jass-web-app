@@ -7,7 +7,8 @@ const {
   verifyPasswordResetOtp,
   resetPasswordWithOtp,
   getMe,
-  updateProfile
+  updateProfile,
+  addAddress
 } = require('../controllers/authController');
 const { protect } = require('../middlewares/auth');
 
@@ -18,5 +19,6 @@ router.post('/forgot-password/verify-otp', verifyPasswordResetOtp);
 router.post('/forgot-password/reset', resetPasswordWithOtp);
 router.get('/me', protect, getMe);
 router.put('/update-profile', protect, updateProfile);
+router.post('/addresses', protect, addAddress);
 
 module.exports = router;

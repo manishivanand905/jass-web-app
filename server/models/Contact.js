@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
 const contactSchema = new mongoose.Schema({
+  requestType: {
+    type: String,
+    enum: ['enquiry', 'ticket'],
+    required: true,
+    default: 'enquiry'
+  },
   name: {
     type: String,
     required: true,

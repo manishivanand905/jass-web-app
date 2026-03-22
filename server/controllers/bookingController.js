@@ -12,10 +12,29 @@ exports.createBooking = async (req, res) => {
       console.log('No user ID found');
       return res.status(401).json({ success: false, message: 'User not authenticated' });
     }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const customerName = req.body.customerName || user.name;
+    const customerEmail = req.body.customerEmail || user.email;
+    const customerPhone = req.body.customerPhone || user.phone;
+
+    if (!customerName || !customerEmail || !customerPhone) {
+      return res.status(400).json({
+        success: false,
+        message: 'Customer profile is incomplete. Please update your name, email and phone before booking.'
+      });
+    }
     
     const bookingData = {
       ...req.body,
       user: userId,
+      customerName,
+      customerEmail,
+      customerPhone,
       status: 'pending',
       isCombo: req.body.isCombo || false,
       originalPrice: req.body.originalPrice || null
@@ -24,9 +43,7 @@ exports.createBooking = async (req, res) => {
     console.log('Creating booking with user ID:', userId);
     const booking = await Booking.create(bookingData);
     console.log('Booking created with ID:', booking._id, 'User:', booking.user);
-    
-    const user = await User.findById(userId);
-    
+
     // Find service to get image
     let serviceImage = 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=200&fit=crop';
     try {
@@ -55,8 +72,8 @@ exports.createBooking = async (req, res) => {
     await createNotificationForUser(
       userId,
       'booking_confirmation',
-      'Booking Confirmed!',
-      `Your ${booking.servicePackage} booking for ${new Date(booking.date).toLocaleDateString()} has been confirmed.`,
+      'Booking Placed',
+      `Your booking for ${booking.servicePackage || booking.service} on ${new Date(booking.date).toLocaleDateString()} has been placed successfully.`,
       'fa-solid fa-calendar-check',
       booking._id,
       'Booking'
@@ -145,18 +162,32 @@ exports.getBookingById = async (req, res) => {
 exports.updateBookingStatus = async (req, res) => {
   try {
     const { status } = req.body;
+    const existingBooking = await Booking.findById(req.params.id);
+    if (!existingBooking) {
+      return res.status(404).json({ success: false, message: 'Booking not found' });
+    }
+
     const booking = await Booking.findByIdAndUpdate(
       req.params.id,
       { status },
       { new: true, runValidators: true }
     );
-    if (!booking) {
-      return res.status(404).json({ success: false, message: 'Booking not found' });
-    }
     
     const user = await User.findById(booking.user);
     if (user) {
       sendBookingStatusUpdateEmail(booking, user);
+
+      if (status === 'confirmed' && existingBooking.status !== 'confirmed') {
+        await createNotificationForUser(
+          booking.user,
+          'booking_confirmation',
+          'Booking Confirmed',
+          `Your booking for ${booking.servicePackage || booking.service} on ${new Date(booking.date).toLocaleDateString()} has been confirmed by our team.`,
+          'fa-solid fa-calendar-check',
+          booking._id,
+          'Booking'
+        );
+      }
     }
     
     res.json({ success: true, booking });

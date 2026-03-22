@@ -18,6 +18,19 @@ export const CheckoutContainer = styled.div`
   }
 `;
 
+export const TopBar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+`;
+
 export const StepIndicator = styled.div`
   display: flex;
   justify-content: space-between;
@@ -94,6 +107,13 @@ export const CheckoutContent = styled.div`
 
 export const AddressSection = styled.div``;
 
+export const SectionIntro = styled.p`
+  margin: -8px 0 20px;
+  color: ${props => props.theme.colors.gray};
+  font-size: 15px;
+  line-height: 1.5;
+`;
+
 export const AddressCard = styled.div`
   display: flex;
   gap: 15px;
@@ -114,6 +134,20 @@ export const AddressCard = styled.div`
     cursor: pointer;
     accent-color: ${props => props.theme.colors.primary};
   }
+`;
+
+export const AddressTag = styled.span`
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  margin-bottom: 10px;
+  border-radius: 999px;
+  background: rgba(204, 0, 0, 0.15);
+  color: ${props => props.theme.colors.primary};
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 `;
 
 export const AddressDetails = styled.div`
@@ -152,6 +186,93 @@ export const AddNewBtn = styled.button`
   &:hover {
     background: ${props => props.theme.colors.primary};
     color: ${props => props.theme.colors.background};
+  }
+`;
+
+export const AddressForm = styled.form`
+  margin-top: 18px;
+  padding: 22px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+`;
+
+export const AddressFormGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const FieldGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+
+  label {
+    color: ${props => props.theme.colors.background};
+    font-size: 14px;
+    font-weight: 600;
+  }
+`;
+
+export const FieldInput = styled.input`
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.25);
+  color: ${props => props.theme.colors.background};
+  font-size: 15px;
+
+  &:focus {
+    outline: none;
+    border-color: ${props => props.theme.colors.primary};
+    box-shadow: 0 0 0 3px rgba(204, 0, 0, 0.15);
+  }
+
+  &::placeholder {
+    color: rgba(255,255,255,0.4);
+  }
+`;
+
+export const FieldTextarea = styled.textarea`
+  width: 100%;
+  min-height: 110px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.25);
+  color: ${props => props.theme.colors.background};
+  font-size: 15px;
+  resize: vertical;
+
+  &:focus {
+    outline: none;
+    border-color: ${props => props.theme.colors.primary};
+    box-shadow: 0 0 0 3px rgba(204, 0, 0, 0.15);
+  }
+
+  &::placeholder {
+    color: rgba(255,255,255,0.4);
+  }
+`;
+
+export const InlineCheckbox = styled.label`
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 0;
+  color: ${props => props.theme.colors.gray};
+  font-size: 14px;
+  cursor: pointer;
+
+  input {
+    accent-color: ${props => props.theme.colors.primary};
   }
 `;
 
@@ -260,5 +381,37 @@ export const ContinueBtn = styled.button`
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+`;
+
+export const ActionRow = styled.div`
+  display: flex;
+  gap: 14px;
+  margin-top: 30px;
+
+  > button {
+    flex: 1;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+`;
+
+export const SecondaryBtn = styled.button`
+  width: 100%;
+  padding: 15px;
+  background: transparent;
+  color: ${props => props.theme.colors.background};
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: ${props => props.theme.transitions.normal};
+
+  &:hover {
+    border-color: ${props => props.theme.colors.primary};
+    color: ${props => props.theme.colors.primary};
   }
 `;

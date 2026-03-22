@@ -198,6 +198,59 @@ export const Price = styled.div`
   display: inline-block;
 `;
 
+export const PriceRow = styled.div`
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+
+  @media (max-width: 640px) {
+    align-items: stretch;
+  }
+`;
+
+export const PriceCartButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 14px 24px;
+  background: #cc0000;
+  border: 1px solid #cc0000;
+  border-radius: 10px;
+  color: #ffffff;
+  font-family: "Barlow Condensed", Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 10px 24px rgba(204, 0, 0, 0.28);
+
+  &:hover {
+    background: #e00000;
+    border-color: #e00000;
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px rgba(204, 0, 0, 0.38);
+  }
+
+  &:disabled {
+    border-color: rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.08);
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+  @media (max-width: 640px) {
+    width: 100%;
+  }
+`;
+
 export const Description = styled.p`
   font-family: "Cormorant Garamond", Georgia, serif;
   font-size: 17px;

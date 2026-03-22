@@ -270,6 +270,25 @@ const SummaryItem = styled.div`
   }
 `;
 
+const ProfileAlert = styled.div`
+  padding: 18px;
+  border: 1px solid rgba(201, 0, 0, 0.35);
+  border-radius: 8px;
+  background: rgba(201, 0, 0, 0.08);
+  color: #ececec;
+
+  h3 {
+    margin: 0 0 8px;
+    font-size: 1.05rem;
+  }
+
+  p {
+    margin: 0;
+    color: rgba(236, 236, 236, 0.8);
+    line-height: 1.5;
+  }
+`;
+
 const ButtonGroup = styled.div`
   display: flex;
   gap: 12px;
@@ -344,6 +363,17 @@ const NewBookingModal = () => {
     }
   }, [initialData, isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    setFormData((prev) => ({
+      ...prev,
+      name: user?.name || prev.name || "",
+      email: user?.email || prev.email || "",
+      phone: user?.phone || prev.phone || "",
+    }));
+  }, [user, isOpen]);
+
   const timeSlots = [
     "10:00 AM",
     "11:00 AM",
@@ -356,6 +386,8 @@ const NewBookingModal = () => {
     "06:00 PM",
   ];
   const pickupCharge = 499;
+  const hasIncompleteProfile =
+    !!user && (!user.name?.trim() || !user.email?.trim() || !user.phone?.trim());
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -394,6 +426,11 @@ const NewBookingModal = () => {
       toast.info("Please login to book a service");
       closeModal();
       navigate("/login");
+      return;
+    }
+
+    if (!formData.name || !formData.email || !formData.phone) {
+      toast.error("Your profile details are missing. Please login again and try booking.");
       return;
     }
 
@@ -450,6 +487,45 @@ const NewBookingModal = () => {
   };
 
   if (!isOpen) return null;
+
+  if (hasIncompleteProfile) {
+    return (
+      <Overlay onClick={closeModal}>
+        <Modal onClick={(e) => e.stopPropagation()}>
+          <Header>
+            <Title>Book Service</Title>
+            <CloseBtn onClick={closeModal}>
+              <i className="fa-solid fa-xmark"></i>
+            </CloseBtn>
+          </Header>
+
+          <Content>
+            <ProfileAlert>
+              <h3>Complete Your Profile Before Booking</h3>
+              <p>
+                Please update your name, Gmail address, and mobile number in your
+                profile first. We need these details to confirm your booking and
+                send updates.
+              </p>
+            </ProfileAlert>
+
+            <ButtonGroup>
+              <Button onClick={closeModal}>Close</Button>
+              <Button
+                $primary
+                onClick={() => {
+                  closeModal();
+                  navigate("/profile");
+                }}
+              >
+                Go to Profile
+              </Button>
+            </ButtonGroup>
+          </Content>
+        </Modal>
+      </Overlay>
+    );
+  }
 
   return (
     <Overlay onClick={closeModal}>

@@ -93,6 +93,32 @@ export const userAPI = {
     }
   },
 
+  getMe: async () => {
+    const token = localStorage.getItem('userToken');
+    try {
+      const response = await fetch(`${API_BASE}/auth/me`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      return response.json();
+    } catch (error) {
+      return { success: false, message: error.message };
+    }
+  },
+
+  addAddress: async (data) => {
+    const token = localStorage.getItem('userToken');
+    try {
+      const response = await fetch(`${API_BASE}/auth/addresses`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(data)
+      });
+      return response.json();
+    } catch (error) {
+      return { success: false, message: error.message };
+    }
+  },
+
   getBookingById: async (id) => {
     try {
       const response = await fetch(`${API_BASE}/bookings/${id}`);
