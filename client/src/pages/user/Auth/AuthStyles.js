@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { Link } from "react-router-dom";
 
 export const Container = styled.div`
   height: 100vh;
@@ -46,10 +47,12 @@ export const VisualPanel = styled.div`
   }
 `;
 
-export const Logo = styled.div`
+export const Logo = styled(Link)`
   font-family: "Barlow Condensed", sans-serif;
   font-size: 28px;
   font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
 
   span:first-child {
     color: #fff;

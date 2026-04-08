@@ -1,6 +1,10 @@
 const errorHandler = (err, req, res, next) => {
   console.error(err.stack);
 
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({ success: false, message: err.message });
+  }
+
   if (err.name === 'ValidationError') {
     const errors = Object.values(err.errors).map(e => e.message);
     return res.status(400).json({ success: false, message: errors.join(', ') });

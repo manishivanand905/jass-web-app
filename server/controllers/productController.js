@@ -1,29 +1,39 @@
 const Product = require('../models/Product');
 const { uploadToCloudinary } = require('../utils/cloudinary');
 const { createNotificationForAllUsers } = require('./notificationController');
+const {
+  isDatabaseUnavailableError,
+  getDatabaseUnavailableMessage
+} = require('../utils/databaseErrors');
 
 exports.getAllProducts = async (req, res) => {
   try {
     const { page = 1, limit = 10, search = '', category = '' } = req.query;
+    const pageNumber = Math.max(Number.parseInt(page, 10) || 1, 1);
+    const limitNumber = Math.max(Number.parseInt(limit, 10) || 10, 1);
     const query = {};
     
     if (search) query.name = { $regex: search, $options: 'i' };
     if (category) query.category = category;
 
     const products = await Product.find(query)
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
+      .limit(limitNumber)
+      .skip((pageNumber - 1) * limitNumber)
       .sort({ createdAt: -1 });
 
     const count = await Product.countDocuments(query);
 
     res.json({
       products,
-      totalPages: Math.ceil(count / limit),
-      currentPage: page,
+      totalPages: Math.ceil(count / limitNumber),
+      currentPage: pageNumber,
       total: count
     });
   } catch (error) {
+    if (isDatabaseUnavailableError(error)) {
+      return res.status(503).json({ message: getDatabaseUnavailableMessage() });
+    }
+
     res.status(500).json({ message: error.message });
   }
 };
@@ -34,6 +44,10 @@ exports.getProduct = async (req, res) => {
     if (!product) return res.status(404).json({ message: 'Product not found' });
     res.json(product);
   } catch (error) {
+    if (isDatabaseUnavailableError(error)) {
+      return res.status(503).json({ message: getDatabaseUnavailableMessage() });
+    }
+
     res.status(500).json({ message: error.message });
   }
 };

@@ -444,7 +444,7 @@ const UserAuth = () => {
     <>
       <Container>
         <VisualPanel>
-          <Logo>
+          <Logo to="/">
             <span>JASS</span>
             <span>AUTOMOTIVES</span>
           </Logo>

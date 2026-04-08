@@ -1,18 +1,31 @@
 const Service = require('../models/Service');
 const { uploadToCloudinary } = require('../utils/cloudinary');
 const { createNotificationForAllUsers } = require('./notificationController');
+const {
+  isDatabaseUnavailableError,
+  getDatabaseUnavailableMessage
+} = require('../utils/databaseErrors');
 
 exports.getAllServices = async (req, res) => {
   try {
     const { search = '', category = '' } = req.query;
     const query = {};
     
-    if (search) query.name = { $regex: search, $options: 'i' };
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { name: { $regex: search, $options: 'i' } }
+      ];
+    }
     if (category) query.category = category;
 
     const services = await Service.find(query).sort({ createdAt: -1 });
     res.json(services);
   } catch (error) {
+    if (isDatabaseUnavailableError(error)) {
+      return res.status(503).json({ message: getDatabaseUnavailableMessage() });
+    }
+
     res.status(500).json({ message: error.message });
   }
 };
@@ -23,6 +36,10 @@ exports.getService = async (req, res) => {
     if (!service) return res.status(404).json({ message: 'Service not found' });
     res.json(service);
   } catch (error) {
+    if (isDatabaseUnavailableError(error)) {
+      return res.status(503).json({ message: getDatabaseUnavailableMessage() });
+    }
+
     res.status(500).json({ message: error.message });
   }
 };

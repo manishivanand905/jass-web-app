@@ -26,6 +26,17 @@ const explicitOrigins = [
   ...(process.env.FRONTEND_URLS || "").split(",").map((o) => o.trim()),
 ].filter(Boolean);
 
+const isLocalDevOrigin = (origin) => {
+  try {
+    const { hostname, protocol } = new URL(origin);
+    const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1";
+    const isHttp = protocol === "http:" || protocol === "https:";
+    return isLocalhost && isHttp;
+  } catch {
+    return false;
+  }
+};
+
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -33,8 +44,9 @@ app.use(
 
       const isExplicitlyAllowed = explicitOrigins.includes(origin);
       const isVercelPreview = origin.endsWith(".vercel.app");
+      const isLocalDevelopment = isLocalDevOrigin(origin);
 
-      if (isExplicitlyAllowed || isVercelPreview) {
+      if (isExplicitlyAllowed || isVercelPreview || isLocalDevelopment) {
         return callback(null, true);
       }
 
