@@ -61,10 +61,11 @@ exports.createProduct = async (req, res) => {
       imageUrl = result.secure_url;
     }
 
-    const product = new Product({
-      ...req.body,
-      image: imageUrl
-    });
+    const body = { ...req.body };
+    try { if (typeof body.specifications === 'string') body.specifications = JSON.parse(body.specifications); } catch(e) { body.specifications = []; }
+    try { if (typeof body.features === 'string') body.features = JSON.parse(body.features); } catch(e) { body.features = []; }
+
+    const product = new Product({ ...body, image: imageUrl });
     await product.save();
 
     // Create notification for all users
@@ -86,6 +87,8 @@ exports.createProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
   try {
     let updateData = { ...req.body };
+    try { if (typeof updateData.specifications === 'string') updateData.specifications = JSON.parse(updateData.specifications); } catch(e) { delete updateData.specifications; }
+    try { if (typeof updateData.features === 'string') updateData.features = JSON.parse(updateData.features); } catch(e) { delete updateData.features; }
 
     if (req.file) {
       const result = await uploadToCloudinary(req.file.buffer, 'jass_automotives/products');

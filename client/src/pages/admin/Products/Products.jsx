@@ -93,7 +93,9 @@ const Products = () => {
       
       const submitData = new FormData();
       Object.keys(formData).forEach(key => {
-        submitData.append(key, formData[key]);
+        if (key !== 'specifications' && key !== 'features') {
+          submitData.append(key, formData[key]);
+        }
       });
       submitData.append('specifications', JSON.stringify(specs));
       submitData.append('features', JSON.stringify(features));

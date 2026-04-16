@@ -53,10 +53,12 @@ exports.createService = async (req, res) => {
       imageUrl = result.secure_url;
     }
 
-    const service = new Service({
-      ...req.body,
-      image: imageUrl
-    });
+    const body = { ...req.body };
+    if (typeof body.features === 'string') body.features = JSON.parse(body.features);
+    if (typeof body.tiers === 'string') body.tiers = JSON.parse(body.tiers);
+    if (typeof body.includes === 'string') body.includes = JSON.parse(body.includes);
+
+    const service = new Service({ ...body, image: imageUrl });
     await service.save();
 
     // Create notification for all users
@@ -78,6 +80,9 @@ exports.createService = async (req, res) => {
 exports.updateService = async (req, res) => {
   try {
     let updateData = { ...req.body };
+    try { if (typeof updateData.features === 'string') updateData.features = JSON.parse(updateData.features); } catch(e) {}
+    try { if (typeof updateData.tiers === 'string') updateData.tiers = JSON.parse(updateData.tiers); } catch(e) {}
+    try { if (typeof updateData.includes === 'string') updateData.includes = JSON.parse(updateData.includes); } catch(e) {}
 
     if (req.file) {
       const result = await uploadToCloudinary(req.file.buffer, 'jass_automotives/services');
