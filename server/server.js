@@ -40,21 +40,29 @@ const isLocalDevOrigin = (origin) => {
 app.use(
   cors({
     origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, Postman)
       if (!origin) return callback(null, true);
 
       const isExplicitlyAllowed = explicitOrigins.includes(origin);
       const isVercelPreview = origin.endsWith(".vercel.app");
       const isLocalDevelopment = isLocalDevOrigin(origin);
+      const isRenderPreview = origin.endsWith(".onrender.com");
 
-      if (isExplicitlyAllowed || isVercelPreview || isLocalDevelopment) {
+      if (isExplicitlyAllowed || isVercelPreview || isLocalDevelopment || isRenderPreview) {
         return callback(null, true);
       }
 
       return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    optionsSuccessStatus: 200,
   }),
 );
+
+// Handle preflight requests for all routes
+app.options("*", cors());
 app.use(express.json({ limit: "25mb" }));
 app.use(express.urlencoded({ extended: true, limit: "25mb" }));
 
