@@ -1,6 +1,5 @@
 import styled, { keyframes } from "styled-components";
 
-// ─── Animations ────────────────────────────────────────────────────────────────
 const fadeInUp = keyframes`
   from { opacity: 0; transform: translateY(40px); }
   to   { opacity: 1; transform: translateY(0);    }
@@ -16,14 +15,17 @@ const arrowBounce = keyframes`
   50%       { transform: translateX(5px); }
 `;
 
-// ─── Section Wrapper ───────────────────────────────────────────────────────────
+const scrollLeft = keyframes`
+  0%   { transform: translateX(0);    }
+  100% { transform: translateX(-50%); }
+`;
+
 export const SectionWrapper = styled.section`
   background: #0a0a0a;
-  padding: 90px 60px 80px;
+  padding: 90px 0 80px;
   position: relative;
   overflow: hidden;
 
-  /* Subtle top border accent */
   &::before {
     content: "";
     position: absolute;
@@ -36,26 +38,27 @@ export const SectionWrapper = styled.section`
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.desktop}) {
-    padding: 70px 40px 60px;
+    padding: 70px 0 60px;
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
-    padding: 60px 24px 50px;
+    padding: 60px 0 50px;
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    padding: 48px 16px 40px;
+    padding: 48px 0 40px;
   }
 `;
 
-// ─── Section Header ────────────────────────────────────────────────────────────
 export const SectionHeader = styled.div`
   text-align: center;
-  margin-bottom: 56px;
+  margin-bottom: 48px;
+  padding: 0 60px;
   animation: ${fadeInUp} 0.7s ease both;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
-    margin-bottom: 40px;
+    margin-bottom: 36px;
+    padding: 0 24px;
   }
 `;
 
@@ -83,26 +86,45 @@ export const SectionTitle = styled.h2`
   }
 `;
 
-// ─── Products Grid ─────────────────────────────────────────────────────────────
-export const ProductsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 56px;
+export const ScrollTrack = styled.div`
+  overflow: hidden;
+  width: 100%;
+  margin-bottom: 48px;
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 6%,
+    black 94%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 6%,
+    black 94%,
+    transparent 100%
+  );
+`;
 
-  @media (max-width: ${({ theme }) => theme.breakpoints.desktop}) {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
+export const ScrollInner = styled.div`
+  display: flex;
+  gap: 16px;
+  width: max-content;
+  animation: ${scrollLeft} 40s linear infinite;
+
+  &:hover {
+    animation-play-state: paused;
   }
 
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    grid-template-columns: 1fr;
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
     gap: 12px;
+    animation-duration: 30s;
   }
 `;
 
-// ─── Product Card ──────────────────────────────────────────────────────────────
 export const ProductCard = styled.article`
+  width: 280px;
+  flex-shrink: 0;
   background: #111111;
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 6px;
@@ -114,7 +136,6 @@ export const ProductCard = styled.article`
     border-color 0.3s ease,
     transform 0.3s ease,
     box-shadow 0.3s ease;
-  animation: ${fadeInUp} 0.7s ease ${({ $delay }) => $delay || "0s"} both;
 
   &:hover {
     border-color: rgba(204, 0, 0, 0.45);
@@ -127,16 +148,18 @@ export const ProductCard = styled.article`
       transform: scale(1.07);
     }
 
-    /* Reveal the "View Details" text */
-    .view-details-text {
-      opacity: 1;
-      color: #cc0000;
-    }
-
     .arrow-icon {
       animation: ${arrowBounce} 0.6s ease infinite;
       color: #cc0000;
     }
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    width: 240px;
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    width: 200px;
   }
 `;
 
@@ -173,11 +196,11 @@ export const BadgePill = styled.span`
 `;
 
 export const CardBody = styled.div`
-  padding: 18px 20px 20px;
+  padding: 16px 18px 18px;
   display: flex;
   flex-direction: column;
   flex: 1;
-  gap: 8px;
+  gap: 6px;
 `;
 
 export const CardCategory = styled.p`
@@ -197,6 +220,9 @@ export const CardName = styled.h3`
   color: #ffffff;
   line-height: 1.25;
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
     font-size: ${({ theme }) => theme.fontSize.lg};
@@ -205,15 +231,15 @@ export const CardName = styled.h3`
 
 export const CardDescription = styled.p`
   font-family: "Cormorant Garamond", Georgia, serif;
-  font-size: ${({ theme }) => theme.fontSize.base};
+  font-size: ${({ theme }) => theme.fontSize.sm};
   color: rgba(255, 255, 255, 0.45);
-  line-height: 1.6;
+  line-height: 1.5;
   margin: 0;
   flex: 1;
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
-    font-size: ${({ theme }) => theme.fontSize.sm};
-  }
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 `;
 
 export const CardFooter = styled.div`
@@ -221,7 +247,7 @@ export const CardFooter = styled.div`
   align-items: center;
   justify-content: space-between;
   margin-top: 8px;
-  padding-top: 14px;
+  padding-top: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 `;
 
@@ -285,10 +311,10 @@ export const ViewDetailsBtn = styled.button`
   }
 `;
 
-// ─── View All Button ───────────────────────────────────────────────────────────
 export const ViewAllWrapper = styled.div`
   display: flex;
   justify-content: center;
+  padding: 0 60px;
   animation: ${slideInLeft} 0.7s ease 0.5s both;
 `;
 
@@ -310,7 +336,6 @@ export const ViewAllButton = styled.button`
   position: relative;
   overflow: hidden;
 
-  /* Red fill on hover */
   &::before {
     content: "";
     position: absolute;
@@ -346,3 +371,5 @@ export const ViewAllButton = styled.button`
     font-size: ${({ theme }) => theme.fontSize.xs};
   }
 `;
+
+export const ProductsGrid = styled.div`display: none;`;

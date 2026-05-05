@@ -14,19 +14,25 @@ import {
   CTAGroup,
   PrimaryButton,
   SecondaryButton,
-  ProductsGrid,
-  ProductCard,
-  ProductImageWrapper,
   GoldDivider,
   TickerWrapper,
   TickerTrack,
   TickerCard,
   TickerImage,
   TickerLabel,
+  TickerOverlay,
   StatsRow,
   StatItem,
   StatNumber,
   StatLabel,
+  DesktopScrollSection,
+  ScrollRow,
+  ScrollTrack,
+  ScrollCard,
+  ScrollCardImage,
+  ScrollCardOverlay,
+  ScrollCardName,
+  ScrollCardPrice,
 } from "./HeroStyles";
 
 const stats = [
@@ -42,7 +48,7 @@ const HeroSection = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const { data } = await axios.get(`${API_BASE}/products?limit=6`);
+        const { data } = await axios.get(`${API_BASE}/products?limit=100`);
         setHeroProducts(data.products || []);
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -51,12 +57,18 @@ const HeroSection = () => {
     fetchProducts();
   }, []);
 
+  // Duplicate for seamless infinite loop
+  const loopItems = [...heroProducts, ...heroProducts, ...heroProducts];
   const tickerItems = [...heroProducts, ...heroProducts];
+
+  const half = Math.ceil(loopItems.length / 2);
+  const row1 = loopItems.slice(0, half);
+  const row2 = loopItems.slice(half);
 
   return (
     <HeroWrapper>
       <HeroInner>
-        {/* TABLET + MOBILE: auto-scrolling product ticker */}
+        {/* MOBILE: auto-scrolling product ticker */}
         <TickerWrapper>
           <TickerTrack>
             {tickerItems.map((product, index) => (
@@ -64,6 +76,10 @@ const HeroSection = () => {
                 <TickerImage>
                   <img src={product.image} alt={product.name} loading="lazy" />
                 </TickerImage>
+                <TickerOverlay>
+                  <span>{product.name}</span>
+                  <strong>₹{Number(product.price || 0).toLocaleString()}</strong>
+                </TickerOverlay>
                 <TickerLabel>
                   <p>{product.name}</p>
                   <span>₹{product.price}</span>
@@ -73,7 +89,7 @@ const HeroSection = () => {
           </TickerTrack>
         </TickerWrapper>
 
-        {/* ALL BREAKPOINTS: left text content */}
+        {/* LEFT TEXT CONTENT */}
         <LeftContent>
           <BadgeWrapper>
             <BadgeDot />
@@ -112,16 +128,48 @@ const HeroSection = () => {
           ))}
         </StatsRow>
 
-        {/* DESKTOP ONLY: floating product grid */}
-        <ProductsGrid>
-          {heroProducts.slice(0, 6).map((product, index) => (
-            <ProductCard key={product._id} $delay={index * 0.15} onClick={() => navigate(`/products/${product._id}`)}>
-              <ProductImageWrapper>
-                <img src={product.image} alt={product.name} loading="lazy" />
-              </ProductImageWrapper>
-            </ProductCard>
-          ))}
-        </ProductsGrid>
+        {/* DESKTOP ONLY: 2-row infinite scroll */}
+        <DesktopScrollSection>
+          {/* Row 1: left to right */}
+          <ScrollRow>
+            <ScrollTrack $direction="left">
+              {[...row1, ...row1].map((product, index) => (
+                <ScrollCard
+                  key={`r1-${product._id}-${index}`}
+                  onClick={() => navigate(`/products/${product._id}`)}
+                >
+                  <ScrollCardImage>
+                    <img src={product.image} alt={product.name} loading="lazy" />
+                  </ScrollCardImage>
+                  <ScrollCardOverlay>
+                    <ScrollCardName>{product.name}</ScrollCardName>
+                    <ScrollCardPrice>₹{Number(product.price || 0).toLocaleString()}</ScrollCardPrice>
+                  </ScrollCardOverlay>
+                </ScrollCard>
+              ))}
+            </ScrollTrack>
+          </ScrollRow>
+
+          {/* Row 2: right to left */}
+          <ScrollRow>
+            <ScrollTrack $direction="right">
+              {[...row2, ...row2].map((product, index) => (
+                <ScrollCard
+                  key={`r2-${product._id}-${index}`}
+                  onClick={() => navigate(`/products/${product._id}`)}
+                >
+                  <ScrollCardImage>
+                    <img src={product.image} alt={product.name} loading="lazy" />
+                  </ScrollCardImage>
+                  <ScrollCardOverlay>
+                    <ScrollCardName>{product.name}</ScrollCardName>
+                    <ScrollCardPrice>₹{Number(product.price || 0).toLocaleString()}</ScrollCardPrice>
+                  </ScrollCardOverlay>
+                </ScrollCard>
+              ))}
+            </ScrollTrack>
+          </ScrollRow>
+        </DesktopScrollSection>
       </HeroInner>
     </HeroWrapper>
   );

@@ -16,14 +16,14 @@ const pulse = keyframes`
   50%       { opacity: 0.4; }
 `;
 
-const float = keyframes`
-  0%, 100% { transform: translateY(0px);   }
-  50%       { transform: translateY(-10px); }
+const scrollLeft = keyframes`
+  0%   { transform: translateX(0);    }
+  100% { transform: translateX(-50%); }
 `;
 
-const scrollLeft = keyframes`
-  0%   { transform: translateX(0);       }
-  100% { transform: translateX(-50%);    }
+const scrollRight = keyframes`
+  0%   { transform: translateX(-50%); }
+  100% { transform: translateX(0);    }
 `;
 
 // ─── Hero Wrapper ──────────────────────────────────────────────────────────────
@@ -60,7 +60,6 @@ export const HeroWrapper = styled.section`
     z-index: 1;
   }
 
-  /* ── Tablet ── */
   @media (max-width: 1023px) {
     min-height: 100svh;
     align-items: flex-end;
@@ -75,7 +74,6 @@ export const HeroWrapper = styled.section`
     }
   }
 
-  /* ── Mobile ── */
   @media (max-width: 767px) {
     min-height: 100svh;
     align-items: flex-end;
@@ -92,22 +90,20 @@ export const HeroInner = styled.div`
   padding: 80px 60px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 80px;
+  gap: 60px;
   align-items: center;
 
   @media (max-width: 1280px) {
-    gap: 48px;
+    gap: 40px;
     padding: 80px 48px;
   }
 
-  /* ── Tablet: single column, content at bottom ── */
   @media (max-width: 1023px) {
     grid-template-columns: 1fr;
     padding: 0 0 56px;
     gap: 0;
   }
 
-  /* ── Mobile ── */
   @media (max-width: 767px) {
     padding: 0 0 40px;
     gap: 0;
@@ -121,7 +117,6 @@ export const LeftContent = styled.div`
   gap: 20px;
   animation: ${fadeInUp} 0.8s ease both;
 
-  /* ── Tablet: centered, padded ── */
   @media (max-width: 1023px) {
     align-items: center;
     text-align: center;
@@ -129,7 +124,6 @@ export const LeftContent = styled.div`
     gap: 18px;
   }
 
-  /* ── Mobile ── */
   @media (max-width: 767px) {
     align-items: center;
     text-align: center;
@@ -183,13 +177,11 @@ export const HeroTitle = styled.h1`
     display: block;
   }
 
-  /* ── Tablet ── */
   @media (max-width: 1023px) {
     font-size: clamp(3.8rem, 12vw, 6rem);
     line-height: 0.88;
   }
 
-  /* ── Mobile ── */
   @media (max-width: 767px) {
     font-size: clamp(3rem, 14vw, 4.5rem);
     line-height: 0.9;
@@ -206,13 +198,11 @@ export const HeroSubtitle = styled.p`
   max-width: 400px;
   margin: 0;
 
-  /* ── Tablet ── */
   @media (max-width: 1023px) {
     font-size: 1rem;
     max-width: 520px;
   }
 
-  /* ── Mobile ── */
   @media (max-width: 767px) {
     font-size: 0.9rem;
     max-width: 320px;
@@ -242,7 +232,6 @@ export const CTAGroup = styled.div`
     justify-content: center;
   }
 
-  /* ── Mobile: stack buttons full width ── */
   @media (max-width: 767px) {
     flex-direction: column;
     width: 100%;
@@ -315,7 +304,6 @@ export const PrimaryButton = styled.button`
     transform: translateX(4px);
   }
 
-  /* ── Mobile: full width ── */
   @media (max-width: 767px) {
     width: 100%;
     padding: 17px 28px;
@@ -351,7 +339,6 @@ export const SecondaryButton = styled.button`
     background: rgba(204, 0, 0, 0.08);
   }
 
-  /* ── Mobile: full width ── */
   @media (max-width: 767px) {
     width: 100%;
     padding: 15px 24px;
@@ -363,7 +350,6 @@ export const SecondaryButton = styled.button`
 export const StatsRow = styled.div`
   display: none;
 
-  /* ── Tablet + Mobile: show stats strip ── */
   @media (max-width: 1023px) {
     display: flex;
     align-items: center;
@@ -388,7 +374,6 @@ export const StatItem = styled.div`
   gap: 2px;
   flex: 1;
 
-  /* Vertical divider between items */
   &:not(:last-child) {
     border-right: 1px solid rgba(255, 255, 255, 0.1);
   }
@@ -416,64 +401,138 @@ export const StatLabel = styled.span`
   color: rgba(255, 255, 255, 0.4);
 `;
 
-// ─── Desktop Products Grid ─────────────────────────────────────────────────────
-export const ProductsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  animation: ${fadeInUp} 0.8s ease 0.2s both;
+// ─── Desktop 2-Row Infinite Scroll ────────────────────────────────────────────
+export const DesktopScrollSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
 
-  /* ── Tablet + Mobile: hide desktop grid ── */
+  /* Fade edges */
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 8%,
+    black 92%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 8%,
+    black 92%,
+    transparent 100%
+  );
+
   @media (max-width: 1023px) {
     display: none;
   }
 `;
 
-export const ProductCard = styled.div`
-  background: rgba(10, 10, 10, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+export const ScrollRow = styled.div`
+  overflow: hidden;
+  width: 100%;
+`;
+
+export const ScrollTrack = styled.div`
+  display: flex;
+  gap: 12px;
+  width: max-content;
+  animation: ${({ $direction }) => ($direction === "right" ? scrollRight : scrollLeft)}
+    50s linear infinite;
+
+  &:hover {
+    animation-play-state: paused;
+  }
+`;
+
+export const ScrollCard = styled.div`
+  width: 160px;
+  height: 160px;
+  flex-shrink: 0;
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s ease;
-  animation: ${float} ${({ $delay }) => 3.5 + (($delay * 10) % 2)}s ease-in-out
-    infinite;
-  animation-delay: ${({ $delay }) => $delay}s;
-
-  &:nth-child(2),
-  &:nth-child(5) {
-    transform: translateY(24px);
-  }
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: border-color 0.25s ease;
 
   &:hover {
-    border-color: rgba(204, 0, 0, 0.45);
-    box-shadow:
-      0 12px 32px rgba(0, 0, 0, 0.5),
-      0 0 0 1px rgba(204, 0, 0, 0.2);
-    animation-play-state: paused;
+    border-color: rgba(204, 0, 0, 0.5);
 
     img {
       transform: scale(1.08);
     }
   }
+
+  /* Pause the parent track on card hover */
+  &:hover ~ &,
+  &:hover {
+    /* handled by track hover */
+  }
+
+  @media (max-width: 1280px) {
+    width: 140px;
+    height: 140px;
+  }
 `;
 
-export const ProductImageWrapper = styled.div`
+export const ScrollCardImage = styled.div`
   width: 100%;
-  aspect-ratio: 1;
-  overflow: hidden;
+  height: 100%;
   background: #111;
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.5s ease;
     filter: brightness(0.85) contrast(1.1);
+    transition: transform 0.4s ease;
   }
 `;
 
-// ─── Scrolling Ticker Strip (tablet + mobile only) ────────────────────────────
+export const ScrollCardOverlay = styled.div`
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.92) 0%,
+    rgba(0, 0, 0, 0.5) 50%,
+    transparent 100%
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 10px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+
+  ${ScrollCard}:hover & {
+    opacity: 1;
+  }
+`;
+
+export const ScrollCardName = styled.span`
+  font-family: "Barlow Condensed", Arial, sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+`;
+
+export const ScrollCardPrice = styled.span`
+  font-family: "Barlow Condensed", Arial, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #cc0000;
+`;
+
+// ─── Mobile Ticker Strip ──────────────────────────────────────────────────────
 export const TickerWrapper = styled.div`
   display: none;
 
@@ -482,7 +541,6 @@ export const TickerWrapper = styled.div`
     width: 100%;
     overflow: hidden;
     padding: 28px 0 32px;
-    /* Fade edges */
     mask-image: linear-gradient(
       to right,
       transparent 0%,
@@ -519,6 +577,7 @@ export const TickerCard = styled.div`
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
+  position: relative;
   transition: border-color 0.25s ease;
 
   &:hover {
@@ -549,6 +608,49 @@ export const TickerImage = styled.div`
   }
 `;
 
+export const TickerOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 40px;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.9) 0%,
+    rgba(0, 0, 0, 0.5) 50%,
+    transparent 100%
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 8px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+
+  ${TickerCard}:hover & {
+    opacity: 1;
+  }
+
+  span {
+    font-family: "Barlow Condensed", Arial, sans-serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  strong {
+    font-family: "Barlow Condensed", Arial, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #cc0000;
+  }
+`;
+
 export const TickerLabel = styled.div`
   padding: 8px 10px;
 
@@ -572,3 +674,8 @@ export const TickerLabel = styled.div`
     color: #cc0000;
   }
 `;
+
+// ─── Keep old exports for safety (unused but avoids import errors) ─────────────
+export const ProductsGrid = styled.div`display:none;`;
+export const ProductCard = styled.div``;
+export const ProductImageWrapper = styled.div``;

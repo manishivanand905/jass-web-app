@@ -9,7 +9,8 @@ import {
   SectionHeader,
   SectionEyebrow,
   SectionTitle,
-  ProductsGrid,
+  ScrollTrack,
+  ScrollInner,
   ProductCard,
   CardImageWrapper,
   BadgePill,
@@ -24,8 +25,6 @@ import {
   ViewAllButton,
 } from "./CollectionsStyles";
 
-const CARD_DELAYS = ["0.1s", "0.2s", "0.3s", "0.4s"];
-
 const Collections = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
@@ -34,7 +33,7 @@ const Collections = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const { data } = await axios.get(`${API_BASE}/products?limit=4`);
+        const { data } = await axios.get(`${API_BASE}/products?limit=100`);
         setCollections(data.products || []);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -61,6 +60,8 @@ const Collections = () => {
     toast.success("Adding to cart.");
   };
 
+  const loopItems = [...collections, ...collections];
+
   return (
     <SectionWrapper>
       <SectionHeader>
@@ -70,43 +71,44 @@ const Collections = () => {
         </SectionTitle>
       </SectionHeader>
 
-      <ProductsGrid>
-        {collections.map((product, index) => (
-          <ProductCard
-            key={product._id}
-            $delay={CARD_DELAYS[index]}
-            onClick={() => handleViewDetails(product._id)}
-          >
-            <CardImageWrapper>
-              <img src={product.image} alt={product.name} loading="lazy" />
-              {product.badge && <BadgePill>{product.badge}</BadgePill>}
-            </CardImageWrapper>
+      <ScrollTrack>
+        <ScrollInner>
+          {loopItems.map((product, index) => (
+            <ProductCard
+              key={`${product._id}-${index}`}
+              onClick={() => handleViewDetails(product._id)}
+            >
+              <CardImageWrapper>
+                <img src={product.image} alt={product.name} loading="lazy" />
+                {product.badge && <BadgePill>{product.badge}</BadgePill>}
+              </CardImageWrapper>
 
-            <CardBody>
-              <CardCategory>{product.category}</CardCategory>
-              <CardName>{product.name}</CardName>
-              <CardDescription>{product.description}</CardDescription>
+              <CardBody>
+                <CardCategory>{product.category}</CardCategory>
+                <CardName>{product.name}</CardName>
+                <CardDescription>{product.description}</CardDescription>
 
-              <CardFooter>
-                <CardPrice>
-                  {`\u20B9${Number(product.price || 0).toLocaleString()}`}
-                </CardPrice>
-                <ViewDetailsBtn
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleAddToCart(product);
-                  }}
-                  aria-label="Add to cart"
-                  title="Add to cart"
-                >
-                  Add to Cart
-                  <i className="fa-solid fa-cart-plus arrow-icon" />
-                </ViewDetailsBtn>
-              </CardFooter>
-            </CardBody>
-          </ProductCard>
-        ))}
-      </ProductsGrid>
+                <CardFooter>
+                  <CardPrice>
+                    {`\u20B9${Number(product.price || 0).toLocaleString()}`}
+                  </CardPrice>
+                  <ViewDetailsBtn
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleAddToCart(product);
+                    }}
+                    aria-label="Add to cart"
+                    title="Add to cart"
+                  >
+                    Add to Cart
+                    <i className="fa-solid fa-cart-plus arrow-icon" />
+                  </ViewDetailsBtn>
+                </CardFooter>
+              </CardBody>
+            </ProductCard>
+          ))}
+        </ScrollInner>
+      </ScrollTrack>
 
       <ViewAllWrapper>
         <ViewAllButton onClick={handleViewAll}>
