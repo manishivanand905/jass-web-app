@@ -1,5 +1,11 @@
 const { sendEmail } = require("../utils/emailConfig");
 
+const ADMIN_NOTIFICATION_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || "jassautomotives@gmail.com";
+
+const formatCurrency = (value) => `Rs. ${Number(value || 0).toLocaleString("en-IN")}`;
+const formatDate = (value) => new Date(value).toLocaleDateString("en-GB");
+const formatDateTime = (value) => new Date(value).toLocaleString("en-GB");
+
 const emailTemplate = (content) => `
 <!DOCTYPE html>
 <html>
@@ -286,6 +292,109 @@ const sendOrderStatusUpdateEmail = async (order, user) => {
   );
 };
 
+const sendAdminBookingNotificationEmail = async (booking, user) => {
+  const content = `
+    <h2>New Service Booking Received</h2>
+    <p>A new service booking has been placed on Jass Automotives.</p>
+    <div class="info-box">
+      <div class="info-row"><span class="label">Booking ID:</span> <span class="value">${booking.bookingId}</span></div>
+      <div class="info-row"><span class="label">Customer Name:</span> <span class="value">${booking.customerName}</span></div>
+      <div class="info-row"><span class="label">Customer Email:</span> <span class="value">${booking.customerEmail}</span></div>
+      <div class="info-row"><span class="label">Customer Phone:</span> <span class="value">${booking.customerPhone || "N/A"}</span></div>
+      <div class="info-row"><span class="label">User Account:</span> <span class="value">${user?.name || "N/A"} (${user?.email || "N/A"})</span></div>
+      <div class="info-row"><span class="label">Service:</span> <span class="value">${booking.service}</span></div>
+      <div class="info-row"><span class="label">Package:</span> <span class="value">${booking.servicePackage}</span></div>
+      <div class="info-row"><span class="label">Plan:</span> <span class="value">${booking.serviceTier}</span></div>
+      <div class="info-row"><span class="label">Date:</span> <span class="value">${formatDate(booking.date)}</span></div>
+      <div class="info-row"><span class="label">Time:</span> <span class="value">${booking.timeSlot}</span></div>
+      <div class="info-row"><span class="label">Vehicle:</span> <span class="value">${booking.carBrand} ${booking.carModel} (${booking.carYear})</span></div>
+      <div class="info-row"><span class="label">Pickup Option:</span> <span class="value">${booking.pickupOption}</span></div>
+      <div class="info-row"><span class="label">Amount:</span> <span class="value">${formatCurrency(booking.totalAmount)}</span></div>
+      <div class="info-row"><span class="label">Status:</span> <span class="value">${booking.status}</span></div>
+      <div class="info-row"><span class="label">Booked At:</span> <span class="value">${formatDateTime(booking.createdAt || new Date())}</span></div>
+      ${booking.notes ? `<div class="info-row"><span class="label">Notes:</span> <span class="value">${booking.notes}</span></div>` : ""}
+    </div>
+    <p>Please review this booking in the admin dashboard.</p>
+  `;
+
+  await sendEmail(
+    ADMIN_NOTIFICATION_EMAIL,
+    `New Booking ${booking.bookingId} - ${booking.customerName}`,
+    emailTemplate(content),
+  );
+};
+
+const sendAdminOrderNotificationEmail = async (order, user) => {
+  const itemsHtml = order.items.map(item => `
+    <tr>
+      <td style="padding: 12px; border-bottom: 1px solid #f0f0f0;">
+        <strong style="color: #2a2a2a; font-size: 14px;">${item.name}</strong>
+      </td>
+      <td style="padding: 12px; border-bottom: 1px solid #f0f0f0; text-align: center;">
+        <span style="color: #555555;">${item.quantity}</span>
+      </td>
+      <td style="padding: 12px; border-bottom: 1px solid #f0f0f0; text-align: right;">
+        <strong style="color: #C90000;">${formatCurrency(item.price)}</strong>
+      </td>
+      <td style="padding: 12px; border-bottom: 1px solid #f0f0f0; text-align: right;">
+        <strong style="color: #2a2a2a;">${formatCurrency(item.price * item.quantity)}</strong>
+      </td>
+    </tr>
+  `).join("");
+
+  const deliveryAddress = order.deliveryAddress
+    ? `
+      <div class="info-row"><span class="label">Delivery Name:</span> <span class="value">${order.deliveryAddress.fullName || "N/A"}</span></div>
+      <div class="info-row"><span class="label">Delivery Phone:</span> <span class="value">${order.deliveryAddress.phone || "N/A"}</span></div>
+      <div class="info-row"><span class="label">Delivery Address:</span> <span class="value">${[
+        order.deliveryAddress.addressLine,
+        order.deliveryAddress.city,
+        order.deliveryAddress.state,
+        order.deliveryAddress.pincode
+      ].filter(Boolean).join(", ") || "N/A"}</span></div>
+    `
+    : "";
+
+  const content = `
+    <h2>New Product Order Received</h2>
+    <p>A new product order has been placed on Jass Automotives.</p>
+    <div class="info-box">
+      <div class="info-row"><span class="label">Order ID:</span> <span class="value">${order.orderId}</span></div>
+      <div class="info-row"><span class="label">Customer Name:</span> <span class="value">${order.customerName}</span></div>
+      <div class="info-row"><span class="label">Customer Email:</span> <span class="value">${order.customerEmail}</span></div>
+      <div class="info-row"><span class="label">Customer Phone:</span> <span class="value">${order.customerPhone || "N/A"}</span></div>
+      <div class="info-row"><span class="label">User Account:</span> <span class="value">${user?.name || "N/A"} (${user?.email || "N/A"})</span></div>
+      <div class="info-row"><span class="label">Delivery Type:</span> <span class="value">${order.deliveryType}</span></div>
+      ${deliveryAddress}
+      <div class="info-row"><span class="label">Payment Status:</span> <span class="value">${order.paymentStatus}</span></div>
+      <div class="info-row"><span class="label">Order Status:</span> <span class="value">${order.status}</span></div>
+      <div class="info-row"><span class="label">Total Amount:</span> <span class="value">${formatCurrency(order.totalAmount)}</span></div>
+      <div class="info-row"><span class="label">Ordered At:</span> <span class="value">${formatDateTime(order.createdAt || new Date())}</span></div>
+    </div>
+    <h3 style="color: #2a2a2a; margin-top: 30px; margin-bottom: 15px;">Ordered Products</h3>
+    <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden;">
+      <thead>
+        <tr style="background: #f9f9f9;">
+          <th style="padding: 12px; text-align: left; color: #2a2a2a; font-size: 12px; text-transform: uppercase;">Product</th>
+          <th style="padding: 12px; text-align: center; color: #2a2a2a; font-size: 12px; text-transform: uppercase;">Qty</th>
+          <th style="padding: 12px; text-align: right; color: #2a2a2a; font-size: 12px; text-transform: uppercase;">Price</th>
+          <th style="padding: 12px; text-align: right; color: #2a2a2a; font-size: 12px; text-transform: uppercase;">Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${itemsHtml}
+      </tbody>
+    </table>
+    <p style="margin-top: 24px;">Please review this order in the admin dashboard.</p>
+  `;
+
+  await sendEmail(
+    ADMIN_NOTIFICATION_EMAIL,
+    `New Order ${order.orderId} - ${order.customerName}`,
+    emailTemplate(content),
+  );
+};
+
 module.exports = {
   sendRegistrationEmail,
   sendLoginEmail,
@@ -294,4 +403,6 @@ module.exports = {
   sendBookingStatusUpdateEmail,
   sendOrderConfirmationEmail,
   sendOrderStatusUpdateEmail,
+  sendAdminBookingNotificationEmail,
+  sendAdminOrderNotificationEmail,
 };

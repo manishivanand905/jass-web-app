@@ -20,14 +20,70 @@ export const Title = styled.h1`
   @media (max-width: 768px) { font-size: 1.3rem; margin-bottom: 12px; }
 `;
 
-export const HeaderActions = styled.div``;
+export const HeaderActions = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+`;
 
 export const FilterChips = styled.div`
   display: flex;
   gap: 10px;
-  margin-bottom: 30px;
   flex-wrap: wrap;
-  @media (max-width: 768px) { margin-bottom: 15px; gap: 8px; }
+  @media (max-width: 768px) { gap: 8px; }
+`;
+
+export const ExportActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+`;
+
+export const SelectionInfo = styled.span`
+  font-family: 'Barlow Condensed', sans-serif;
+  color: rgba(236, 236, 236, 0.7);
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+`;
+
+export const ExportButton = styled.button`
+  border: 1px solid rgba(201, 0, 0, 0.45);
+  background: linear-gradient(135deg, rgba(201, 0, 0, 0.18), rgba(134, 0, 0, 0.18));
+  color: #ECECEC;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+
+  &:hover {
+    background: linear-gradient(135deg, rgba(201, 0, 0, 0.26), rgba(134, 0, 0, 0.26));
+    border-color: #C90000;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 768px) {
+    flex: 1;
+    justify-content: center;
+  }
 `;
 
 export const Chip = styled.button`
@@ -104,6 +160,13 @@ export const TableCell = styled.td`
       font-size: 0.65rem;
     }
   }
+`;
+
+export const CheckboxInput = styled.input`
+  width: 18px;
+  height: 18px;
+  accent-color: #C90000;
+  cursor: pointer;
 `;
 
 export const StatusBadge = styled.span`

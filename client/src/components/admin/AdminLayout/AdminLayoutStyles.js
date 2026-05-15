@@ -79,6 +79,20 @@ export const MainContent = styled.div`
   }
 `;
 
+export const DesktopTopActions = styled.div`
+  position: fixed;
+  top: 18px;
+  right: 24px;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
 export const TopBar = styled.div`
   background: rgba(255, 255, 255, 0.03);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -102,6 +116,12 @@ export const MenuIcon = styled.div`
   font-size: 1.5rem;
   color: #ECECEC;
   cursor: pointer;
+`;
+
+export const TopBarRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
 `;
 
 export const Overlay = styled.div`

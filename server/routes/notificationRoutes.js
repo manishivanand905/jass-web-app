@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const { getUserNotifications, getAdminNotifications, markAsRead, markAllAsRead } = require('../controllers/notificationController');
-const { protect } = require('../middlewares/auth');
+const { protect, adminOnly } = require('../middlewares/auth');
 
 // Get user notifications
 router.get('/', protect, getUserNotifications);
 
 // Get admin notifications
-router.get('/admin', protect, getAdminNotifications);
+router.get('/admin', protect, adminOnly, getAdminNotifications);
 
 // Mark notification as read
 router.put('/:notificationId/read', protect, markAsRead);

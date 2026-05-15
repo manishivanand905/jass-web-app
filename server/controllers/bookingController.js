@@ -1,5 +1,9 @@
 const Booking = require('../models/Booking');
-const { sendBookingConfirmationEmail, sendBookingStatusUpdateEmail } = require('../services/emailService');
+const {
+  sendBookingConfirmationEmail,
+  sendBookingStatusUpdateEmail,
+  sendAdminBookingNotificationEmail
+} = require('../services/emailService');
 const User = require('../models/User');
 const Service = require('../models/Service');
 const { createNotificationForUser, createNotificationForAdmin } = require('./notificationController');
@@ -66,6 +70,7 @@ exports.createBooking = async (req, res) => {
     
     if (user) {
       sendBookingConfirmationEmail(booking, user, serviceImage);
+      sendAdminBookingNotificationEmail(booking, user);
     }
 
     // Create notification for user
@@ -98,7 +103,8 @@ exports.createBooking = async (req, res) => {
 
 exports.getBookings = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search = '', status = '' } = req.query;
+    const { page = 1, limit = 10, search = '', status = '', all = 'false' } = req.query;
+    const shouldReturnAll = all === 'true';
     
     const query = {};
     if (search) {
@@ -112,18 +118,24 @@ exports.getBookings = async (req, res) => {
     if (status) query.status = status;
 
     const total = await Booking.countDocuments(query);
-    const bookings = await Booking.find(query)
+    let bookingQuery = Booking.find(query)
       .populate('user', 'name email')
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
       .sort({ createdAt: -1 });
+
+    if (!shouldReturnAll) {
+      bookingQuery = bookingQuery
+        .limit(limit * 1)
+        .skip((page - 1) * limit);
+    }
+
+    const bookings = await bookingQuery;
 
     console.log('Admin fetching bookings, found:', bookings.length, 'User IDs:', bookings.map(b => b.user?._id));
 
     res.json({
       success: true,
       bookings,
-      totalPages: Math.ceil(total / limit),
+      totalPages: shouldReturnAll ? 1 : Math.ceil(total / limit),
       currentPage: page,
       total
     });

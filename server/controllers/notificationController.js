@@ -1,7 +1,6 @@
 const Notification = require('../models/Notification');
 const User = require('../models/User');
 
-// Create notification for all users
 const createNotificationForAllUsers = async (type, title, message, icon, relatedId = null, relatedModel = null) => {
   try {
     const users = await User.find({}, '_id');
@@ -21,10 +20,8 @@ const createNotificationForAllUsers = async (type, title, message, icon, related
   }
 };
 
-// Create notification for admin
 const createNotificationForAdmin = async (type, title, message, icon, relatedId = null, relatedModel = null) => {
   try {
-    // Find admin users (assuming role field exists)
     const admins = await User.find({ role: 'admin' }, '_id');
     const notifications = admins.map(admin => ({
       adminId: admin._id,
@@ -42,7 +39,6 @@ const createNotificationForAdmin = async (type, title, message, icon, relatedId 
   }
 };
 
-// Create notification for specific user
 const createNotificationForUser = async (userId, type, title, message, icon, relatedId = null, relatedModel = null) => {
   try {
     await Notification.create({
@@ -59,18 +55,17 @@ const createNotificationForUser = async (userId, type, title, message, icon, rel
   }
 };
 
-// Get user notifications
 const getUserNotifications = async (req, res) => {
   try {
-    const notifications = await Notification.find({ 
+    const notifications = await Notification.find({
       userId: req.user._id,
       $or: [
         { isRead: false },
         { expiresAt: { $gt: new Date() } }
       ]
     })
-    .sort({ createdAt: -1 })
-    .limit(20);
+      .sort({ createdAt: -1 })
+      .limit(20);
 
     res.json({
       success: true,
@@ -82,18 +77,17 @@ const getUserNotifications = async (req, res) => {
   }
 };
 
-// Get admin notifications
 const getAdminNotifications = async (req, res) => {
   try {
-    const notifications = await Notification.find({ 
+    const notifications = await Notification.find({
       adminId: req.user._id,
       $or: [
         { isRead: false },
         { expiresAt: { $gt: new Date() } }
       ]
     })
-    .sort({ createdAt: -1 })
-    .limit(20);
+      .sort({ createdAt: -1 })
+      .limit(20);
 
     res.json({
       success: true,
@@ -105,18 +99,24 @@ const getAdminNotifications = async (req, res) => {
   }
 };
 
-// Mark notification as read
 const markAsRead = async (req, res) => {
   try {
     const { notificationId } = req.params;
     const readAt = new Date();
-    const expiresAt = new Date(readAt.getTime() + 24 * 60 * 60 * 1000); // 24 hours from read time
+    const expiresAt = new Date(readAt.getTime() + 24 * 60 * 60 * 1000);
+    const query = req.user.role === 'admin'
+      ? { _id: notificationId, adminId: req.user._id }
+      : { _id: notificationId, userId: req.user._id };
 
-    await Notification.findByIdAndUpdate(notificationId, {
+    const notification = await Notification.findOneAndUpdate(query, {
       isRead: true,
       readAt,
       expiresAt
     });
+
+    if (!notification) {
+      return res.status(404).json({ success: false, message: 'Notification not found' });
+    }
 
     res.json({ success: true, message: 'Notification marked as read' });
   } catch (error) {
@@ -124,16 +124,15 @@ const markAsRead = async (req, res) => {
   }
 };
 
-// Mark all notifications as read
 const markAllAsRead = async (req, res) => {
   try {
     const readAt = new Date();
     const expiresAt = new Date(readAt.getTime() + 24 * 60 * 60 * 1000);
+    const filter = req.user.role === 'admin'
+      ? { adminId: req.user._id, isRead: false }
+      : { userId: req.user._id, isRead: false };
 
-    await Notification.updateMany(
-      { userId: req.user._id, isRead: false },
-      { isRead: true, readAt, expiresAt }
-    );
+    await Notification.updateMany(filter, { isRead: true, readAt, expiresAt });
 
     res.json({ success: true, message: 'All notifications marked as read' });
   } catch (error) {

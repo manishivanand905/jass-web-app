@@ -1,6 +1,10 @@
 const Order = require('../models/Order');
 const User = require('../models/User');
-const { sendOrderConfirmationEmail, sendOrderStatusUpdateEmail } = require('../services/emailService');
+const {
+  sendOrderConfirmationEmail,
+  sendOrderStatusUpdateEmail,
+  sendAdminOrderNotificationEmail
+} = require('../services/emailService');
 const { createNotificationForUser, createNotificationForAdmin } = require('./notificationController');
 
 exports.createOrder = async (req, res) => {
@@ -31,9 +35,9 @@ exports.createOrder = async (req, res) => {
 
     if (user) {
       sendOrderConfirmationEmail(order, user);
+      sendAdminOrderNotificationEmail(order, user);
     }
 
-    // Create notification for user
     await createNotificationForUser(
       req.user._id,
       'order_confirmation',
@@ -44,11 +48,10 @@ exports.createOrder = async (req, res) => {
       'Order'
     );
 
-    // Create notification for admin
     await createNotificationForAdmin(
       'new_order',
       'New Order Received!',
-      `Order #${order.orderId} placed by ${user.name} for ₹${order.totalAmount}`,
+      `Order #${order.orderId} placed by ${customerName} for Rs. ${Number(order.totalAmount || 0).toLocaleString('en-IN')}`,
       'fa-solid fa-shopping-cart',
       order._id,
       'Order'

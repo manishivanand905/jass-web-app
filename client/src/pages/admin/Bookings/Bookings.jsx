@@ -2,10 +2,41 @@ import React, { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '../../../components/admin/AdminLayout/AdminLayout';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { downloadAdminExport } from '../../../utils/adminExport';
 import {
-  Container, Header, Title, HeaderActions, SearchBar, FilterChips, Chip, Table, TableHeader, TableBody, TableRow,
-  TableCell, StatusBadge, ActionButton, Modal, ModalOverlay, ModalContent, ModalHeader, ModalTitle, CloseButton,
-  DetailGrid, DetailItem, DetailLabel, DetailValue, Select, SubmitButton, EmptyState, Pagination, PageButton
+  Container,
+  Header,
+  Title,
+  HeaderActions,
+  SearchBar,
+  ExportActions,
+  SelectionInfo,
+  ExportButton,
+  FilterChips,
+  Chip,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableCell,
+  CheckboxInput,
+  StatusBadge,
+  ActionButton,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalTitle,
+  CloseButton,
+  DetailGrid,
+  DetailItem,
+  DetailLabel,
+  DetailValue,
+  Select,
+  SubmitButton,
+  EmptyState,
+  Pagination,
+  PageButton
 } from './BookingsStyles';
 
 const Bookings = () => {
@@ -17,6 +48,8 @@ const Bookings = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [newStatus, setNewStatus] = useState('');
+  const [selectedBookings, setSelectedBookings] = useState({});
+  const [exporting, setExporting] = useState(false);
 
   const fetchBookings = useCallback(async () => {
     try {
@@ -39,13 +72,26 @@ const Bookings = () => {
     fetchBookings();
   }, [fetchBookings]);
 
+  useEffect(() => {
+    setSelectedBookings((prev) => {
+      const next = { ...prev };
+      bookings.forEach((booking) => {
+        if (next[booking._id]) {
+          next[booking._id] = booking;
+        }
+      });
+      return next;
+    });
+  }, [bookings]);
+
   const updateStatus = async () => {
     try {
       const token = localStorage.getItem('adminToken');
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-      await axios.patch(`${apiUrl}/api/bookings/${selectedBooking._id}/status`, 
+      await axios.patch(
+        `${apiUrl}/api/bookings/${selectedBooking._id}/status`,
         { status: newStatus },
-        { headers: { Authorization: `Bearer ${token}` }}
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success('Status updated successfully');
       setSelectedBooking(null);
@@ -56,7 +102,13 @@ const Bookings = () => {
   };
 
   const getStatusColor = (status) => {
-    const colors = { pending: '#ff9800', confirmed: '#2196f3', 'in-progress': '#2196f3', completed: '#00c853', cancelled: '#f44336' };
+    const colors = {
+      pending: '#ff9800',
+      confirmed: '#2196f3',
+      'in-progress': '#2196f3',
+      completed: '#00c853',
+      cancelled: '#f44336'
+    };
     return colors[status] || '#999';
   };
 
@@ -66,6 +118,61 @@ const Bookings = () => {
 
   const getPickupCharge = (option) => {
     return option === 'pickup' ? 499 : 0;
+  };
+
+  const selectedCount = Object.keys(selectedBookings).length;
+  const allVisibleSelected = bookings.length > 0 && bookings.every((booking) => selectedBookings[booking._id]);
+
+  const toggleBookingSelection = (booking, isChecked) => {
+    setSelectedBookings((prev) => {
+      const next = { ...prev };
+
+      if (isChecked) {
+        next[booking._id] = booking;
+      } else {
+        delete next[booking._id];
+      }
+
+      return next;
+    });
+  };
+
+  const toggleSelectAllVisible = (isChecked) => {
+    setSelectedBookings((prev) => {
+      const next = { ...prev };
+
+      bookings.forEach((booking) => {
+        if (isChecked) {
+          next[booking._id] = booking;
+        } else {
+          delete next[booking._id];
+        }
+      });
+
+      return next;
+    });
+  };
+
+  const handleExportSelected = async () => {
+    if (!selectedCount) {
+      toast.error('Select at least one booking to export');
+      return;
+    }
+
+    try {
+      setExporting(true);
+      downloadAdminExport({
+        bookings: Object.values(selectedBookings),
+        includeOrders: false,
+        includeBookings: true,
+        filenamePrefix: 'jass-bookings-export'
+      });
+      toast.success('Selected bookings exported successfully');
+    } catch (error) {
+      toast.error('Failed to export selected bookings');
+    } finally {
+      setExporting(false);
+    }
   };
 
   return (
@@ -80,6 +187,13 @@ const Bookings = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
+            <ExportActions>
+              <SelectionInfo>{selectedCount} selected</SelectionInfo>
+              <ExportButton type="button" onClick={handleExportSelected} disabled={!selectedCount || exporting}>
+                <i className={`fas ${exporting ? 'fa-spinner fa-spin' : 'fa-file-export'}`}></i>
+                {exporting ? 'Exporting...' : 'Export Selected'}
+              </ExportButton>
+            </ExportActions>
           </HeaderActions>
         </Header>
 
@@ -104,6 +218,14 @@ const Bookings = () => {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableCell>
+                    <CheckboxInput
+                      type="checkbox"
+                      checked={allVisibleSelected}
+                      onChange={(e) => toggleSelectAllVisible(e.target.checked)}
+                      aria-label="Select all visible bookings"
+                    />
+                  </TableCell>
                   <TableCell>Booking ID</TableCell>
                   <TableCell>Customer</TableCell>
                   <TableCell>Phone</TableCell>
@@ -116,8 +238,16 @@ const Bookings = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {bookings.map(booking => (
+                {bookings.map((booking) => (
                   <TableRow key={booking._id}>
+                    <TableCell data-label="Select">
+                      <CheckboxInput
+                        type="checkbox"
+                        checked={Boolean(selectedBookings[booking._id])}
+                        onChange={(e) => toggleBookingSelection(booking, e.target.checked)}
+                        aria-label={`Select booking ${booking.bookingId}`}
+                      />
+                    </TableCell>
                     <TableCell data-label="Booking ID">{booking.bookingId}</TableCell>
                     <TableCell data-label="Customer">{booking.customerName}</TableCell>
                     <TableCell data-label="Phone">{booking.customerPhone}</TableCell>
@@ -204,17 +334,17 @@ const Bookings = () => {
                   </DetailItem>
                   <DetailItem>
                     <DetailLabel>Service Price</DetailLabel>
-                    <DetailValue>₹{(selectedBooking.totalAmount - getPickupCharge(selectedBooking.pickupOption))?.toLocaleString()}</DetailValue>
+                    <DetailValue>Rs. {(selectedBooking.totalAmount - getPickupCharge(selectedBooking.pickupOption))?.toLocaleString('en-IN')}</DetailValue>
                   </DetailItem>
                   {getPickupCharge(selectedBooking.pickupOption) > 0 && (
                     <DetailItem>
                       <DetailLabel>Pickup Charge</DetailLabel>
-                      <DetailValue>₹{getPickupCharge(selectedBooking.pickupOption)}</DetailValue>
+                      <DetailValue>Rs. {getPickupCharge(selectedBooking.pickupOption).toLocaleString('en-IN')}</DetailValue>
                     </DetailItem>
                   )}
                   <DetailItem>
                     <DetailLabel>Total Amount</DetailLabel>
-                    <DetailValue><strong>₹{selectedBooking.totalAmount?.toLocaleString()}</strong></DetailValue>
+                    <DetailValue><strong>Rs. {selectedBooking.totalAmount?.toLocaleString('en-IN')}</strong></DetailValue>
                   </DetailItem>
                   <DetailItem>
                     <DetailLabel>Status</DetailLabel>

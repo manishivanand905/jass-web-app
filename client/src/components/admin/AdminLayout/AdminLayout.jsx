@@ -1,7 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
-import { Container, Sidebar, Logo, NavItem, MainContent, TopBar, MenuIcon, Overlay } from './AdminLayoutStyles';
+import AdminNotificationDropdown from '../AdminNotifications/AdminNotificationDropdown';
+import {
+  Container,
+  Sidebar,
+  Logo,
+  NavItem,
+  MainContent,
+  DesktopTopActions,
+  TopBar,
+  MenuIcon,
+  TopBarRight,
+  Overlay
+} from './AdminLayoutStyles';
 
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -9,7 +21,7 @@ const AdminLayout = ({ children }) => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
-  const { logoutUser } = useAuth();
+  const { logoutAdmin } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,7 +44,7 @@ const AdminLayout = ({ children }) => {
   ];
 
   const handleLogout = () => {
-    logoutUser();
+    logoutAdmin();
     navigate('/admin/auth');
   };
 
@@ -60,10 +72,16 @@ const AdminLayout = ({ children }) => {
       </Sidebar>
       <Overlay $open={sidebarOpen} onClick={() => setSidebarOpen(false)} />
       <MainContent>
+        <DesktopTopActions>
+          <AdminNotificationDropdown />
+        </DesktopTopActions>
         <TopBar $show={showTopBar}>
           <MenuIcon onClick={() => setSidebarOpen(!sidebarOpen)}>
             <i className="fas fa-bars"></i>
           </MenuIcon>
+          <TopBarRight>
+            <AdminNotificationDropdown />
+          </TopBarRight>
         </TopBar>
         {children}
       </MainContent>

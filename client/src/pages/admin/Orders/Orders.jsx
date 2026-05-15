@@ -2,10 +2,41 @@ import React, { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '../../../components/admin/AdminLayout/AdminLayout';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { downloadAdminExport } from '../../../utils/adminExport';
 import {
-  Container, Header, Title, HeaderActions, FilterChips, Chip, Table, TableHeader, TableBody, TableRow, TableCell,
-  StatusBadge, ActionButton, Modal, ModalOverlay, ModalContent, ModalHeader, ModalTitle, CloseButton, DetailGrid,
-  DetailItem, DetailLabel, DetailValue, ProductGrid, ProductCard, ProductImage, ProductInfo, Select, SubmitButton,
+  Container,
+  Header,
+  Title,
+  HeaderActions,
+  FilterChips,
+  Chip,
+  ExportActions,
+  SelectionInfo,
+  ExportButton,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableCell,
+  CheckboxInput,
+  StatusBadge,
+  ActionButton,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalTitle,
+  CloseButton,
+  DetailGrid,
+  DetailItem,
+  DetailLabel,
+  DetailValue,
+  ProductGrid,
+  ProductCard,
+  ProductImage,
+  ProductInfo,
+  Select,
+  SubmitButton,
   EmptyState
 } from './OrdersStyles';
 
@@ -15,6 +46,8 @@ const Orders = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [newStatus, setNewStatus] = useState('');
+  const [selectedOrders, setSelectedOrders] = useState({});
+  const [exporting, setExporting] = useState(false);
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -23,7 +56,7 @@ const Orders = () => {
       const { data } = await axios.get(`${apiUrl}/api/orders`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      const filtered = statusFilter ? data.orders.filter(o => o.status === statusFilter) : data.orders;
+      const filtered = statusFilter ? data.orders.filter((order) => order.status === statusFilter) : data.orders;
       setOrders(filtered);
     } catch (error) {
       toast.error('Failed to fetch orders');
@@ -36,13 +69,26 @@ const Orders = () => {
     fetchOrders();
   }, [fetchOrders]);
 
+  useEffect(() => {
+    setSelectedOrders((prev) => {
+      const next = { ...prev };
+      orders.forEach((order) => {
+        if (next[order._id]) {
+          next[order._id] = order;
+        }
+      });
+      return next;
+    });
+  }, [orders]);
+
   const updateStatus = async () => {
     try {
       const token = localStorage.getItem('adminToken');
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-      await axios.patch(`${apiUrl}/api/orders/${selectedOrder._id}/status`,
+      await axios.patch(
+        `${apiUrl}/api/orders/${selectedOrder._id}/status`,
         { status: newStatus },
-        { headers: { Authorization: `Bearer ${token}` }}
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success('Status updated successfully');
       setSelectedOrder(null);
@@ -53,8 +99,69 @@ const Orders = () => {
   };
 
   const getStatusColor = (status) => {
-    const colors = { pending: '#ff9800', confirmed: '#2196f3', processing: '#2196f3', completed: '#00c853', cancelled: '#f44336' };
+    const colors = {
+      pending: '#ff9800',
+      confirmed: '#2196f3',
+      processing: '#2196f3',
+      completed: '#00c853',
+      cancelled: '#f44336'
+    };
     return colors[status] || '#999';
+  };
+
+  const selectedCount = Object.keys(selectedOrders).length;
+  const allVisibleSelected = orders.length > 0 && orders.every((order) => selectedOrders[order._id]);
+
+  const toggleOrderSelection = (order, isChecked) => {
+    setSelectedOrders((prev) => {
+      const next = { ...prev };
+
+      if (isChecked) {
+        next[order._id] = order;
+      } else {
+        delete next[order._id];
+      }
+
+      return next;
+    });
+  };
+
+  const toggleSelectAllVisible = (isChecked) => {
+    setSelectedOrders((prev) => {
+      const next = { ...prev };
+
+      orders.forEach((order) => {
+        if (isChecked) {
+          next[order._id] = order;
+        } else {
+          delete next[order._id];
+        }
+      });
+
+      return next;
+    });
+  };
+
+  const handleExportSelected = async () => {
+    if (!selectedCount) {
+      toast.error('Select at least one order to export');
+      return;
+    }
+
+    try {
+      setExporting(true);
+      downloadAdminExport({
+        orders: Object.values(selectedOrders),
+        includeOrders: true,
+        includeBookings: false,
+        filenamePrefix: 'jass-orders-export'
+      });
+      toast.success('Selected orders exported successfully');
+    } catch (error) {
+      toast.error('Failed to export selected orders');
+    } finally {
+      setExporting(false);
+    }
   };
 
   return (
@@ -71,6 +178,13 @@ const Orders = () => {
               <Chip $active={statusFilter === 'completed'} onClick={() => setStatusFilter('completed')}>Completed</Chip>
               <Chip $active={statusFilter === 'cancelled'} onClick={() => setStatusFilter('cancelled')}>Cancelled</Chip>
             </FilterChips>
+            <ExportActions>
+              <SelectionInfo>{selectedCount} selected</SelectionInfo>
+              <ExportButton type="button" onClick={handleExportSelected} disabled={!selectedCount || exporting}>
+                <i className={`fas ${exporting ? 'fa-spinner fa-spin' : 'fa-file-export'}`}></i>
+                {exporting ? 'Exporting...' : 'Export Selected'}
+              </ExportButton>
+            </ExportActions>
           </HeaderActions>
         </Header>
 
@@ -85,6 +199,14 @@ const Orders = () => {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableCell>
+                  <CheckboxInput
+                    type="checkbox"
+                    checked={allVisibleSelected}
+                    onChange={(e) => toggleSelectAllVisible(e.target.checked)}
+                    aria-label="Select all visible orders"
+                  />
+                </TableCell>
                 <TableCell>Order ID</TableCell>
                 <TableCell>Customer</TableCell>
                 <TableCell>Items</TableCell>
@@ -96,12 +218,20 @@ const Orders = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orders.map(order => (
+              {orders.map((order) => (
                 <TableRow key={order._id}>
+                  <TableCell data-label="Select">
+                    <CheckboxInput
+                      type="checkbox"
+                      checked={Boolean(selectedOrders[order._id])}
+                      onChange={(e) => toggleOrderSelection(order, e.target.checked)}
+                      aria-label={`Select order ${order.orderId}`}
+                    />
+                  </TableCell>
                   <TableCell>{order.orderId}</TableCell>
                   <TableCell>{order.customerName}</TableCell>
                   <TableCell>{order.items.length} items</TableCell>
-                  <TableCell>₹{order.totalAmount.toLocaleString()}</TableCell>
+                  <TableCell>Rs. {order.totalAmount.toLocaleString('en-IN')}</TableCell>
                   <TableCell>{order.deliveryType}</TableCell>
                   <TableCell>
                     <StatusBadge $color={getStatusColor(order.status)}>{order.status}</StatusBadge>
@@ -142,7 +272,7 @@ const Orders = () => {
                   </DetailItem>
                   <DetailItem>
                     <DetailLabel>Total Amount</DetailLabel>
-                    <DetailValue>₹{selectedOrder.totalAmount.toLocaleString()}</DetailValue>
+                    <DetailValue>Rs. {selectedOrder.totalAmount.toLocaleString('en-IN')}</DetailValue>
                   </DetailItem>
                 </DetailGrid>
                 <DetailLabel style={{ marginTop: '20px', marginBottom: '10px' }}>Products</DetailLabel>
@@ -152,7 +282,7 @@ const Orders = () => {
                       <ProductImage src={item.image} alt={item.name} />
                       <ProductInfo>
                         <strong>{item.name}</strong>
-                        <p>Qty: {item.quantity} × ₹{item.price.toLocaleString()}</p>
+                        <p>Qty: {item.quantity} x Rs. {item.price.toLocaleString('en-IN')}</p>
                       </ProductInfo>
                     </ProductCard>
                   ))}
